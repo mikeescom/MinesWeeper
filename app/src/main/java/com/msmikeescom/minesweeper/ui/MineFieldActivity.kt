@@ -11,10 +11,17 @@ import android.view.View
 import android.view.View.OnLongClickListener
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
+import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInResult
+import com.google.android.gms.common.api.GoogleApiClient
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.data.FieldObject
 import java.time.LocalTime
 import java.util.*
+
 
 class MineFieldActivity : AppCompatActivity() {
     private enum class FaceType {
@@ -25,20 +32,55 @@ class MineFieldActivity : AppCompatActivity() {
     private var mMineFiled: GridLayout? = null
     private var mFace: ImageView? = null
     private var mSettings: ImageView? = null
+    private var mProfileImage: ImageView? = null
+    private var mProfileName: TextView? = null
     private var mCountDownTimer: CountDownTimer? = null
     private var mTimerStarted = false
     private var mDefaultNumberOfMines = 0
     private var mNumberOfMines = 0
     private var mMinesFound = 0
     private var mChronometerTime = 0
+    private var googleApiClient: GoogleApiClient? = null
+    private var gso: GoogleSignInOptions? = null
     private val mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mine_field)
+        getGoogleAccountResult()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient)
+        if (opr.isDone) {
+            val result = opr.get()
+            handleSignInResult(result)
+        } else {
+            opr.setResultCallback { handleSignInResult(it) }
+        }
+    }
+
+    private fun getGoogleAccountResult () {
+        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build()
+
+        googleApiClient = GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso!!)
+                .build()
+    }
+
+    private fun handleSignInResult(result: GoogleSignInResult) {
+        var account : GoogleSignInAccount? = null
+        if (result.isSuccess) {
+            account = result.signInAccount
+            Log.i(TAG, "Name: " + account?.familyName)
+        }
         initData()
         initFieldObjectsArray()
         buildMineFiled()
         initView()
+        initProfile(account!!)
         initMineField()
     }
 
@@ -49,12 +91,19 @@ class MineFieldActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        mProfileImage = findViewById(R.id.profile_image)
+        mProfileName = findViewById(R.id.profile_name)
         mMineFiled = findViewById(R.id.mine_field)
         mFace = findViewById(R.id.face)
         mFace?.setOnClickListener(View.OnClickListener { recreate() })
         mSettings = findViewById(R.id.settings)
         mSettings?.setOnClickListener(View.OnClickListener { showSettingsPopupWindowClick(mMineFiled?.rootView) })
         updateCounter(mNumberOfMines)
+    }
+
+    private fun initProfile(account: GoogleSignInAccount) {
+        mProfileName?.text = account.displayName
+        Glide.with(this).load(account.photoUrl).into(mProfileImage!!);
     }
 
     private fun initFieldObjectsArray() {
