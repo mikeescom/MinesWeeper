@@ -4,6 +4,7 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -42,10 +43,23 @@ class MineFieldActivity : AppCompatActivity() {
     private var mChronometerTime = 0
     private var googleApiClient: GoogleApiClient? = null
     private var gso: GoogleSignInOptions? = null
-    private val mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
+    private var dpHeight = 0
+    private var dpWidth = 0
+    private var HORIZONTAL_SIZE = 0
+    private var VERTICAL_SIZE = 0
+    private var mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mine_field)
+
+        val displayMetrics: DisplayMetrics = resources.displayMetrics
+        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 136
+        dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+        VERTICAL_SIZE = (dpHeight / 30).toInt()
+        HORIZONTAL_SIZE = (dpWidth / 30).toInt()
+        mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
+
         getGoogleAccountResult()
     }
 
@@ -508,8 +522,6 @@ class MineFieldActivity : AppCompatActivity() {
         private const val EASY_LEVEL_NUMBER_MINES = 36
         private const val MEDIUM_LEVEL_NUMBER_MINES = 51
         private const val HARD_LEVEL_NUMBER_MINES = 66
-        private const val HORIZONTAL_SIZE = 12
-        private const val VERTICAL_SIZE = 20
         private const val EMPTY = 0
         private const val MINE = 9
         private const val ONE = 1
