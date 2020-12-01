@@ -7,14 +7,13 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -73,6 +72,14 @@ class MineFieldFragment : Fragment() {
 
     companion object {
         private const val TAG = "MineFieldFragment"
+
+        fun getInstance(position: Int): Fragment {
+            val bundle = Bundle()
+            bundle.putInt("pos", position)
+            val tabFragment = MineFieldFragment()
+            tabFragment.arguments = bundle
+            return tabFragment
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -295,7 +302,7 @@ class MineFieldFragment : Fragment() {
     private fun unCoverSquare(x: Int, y: Int) {
         mFieldObjects[x][y]!!.isCovered = false
         (mFieldObjects[x][y]!!.squareView?.findViewById<View>(R.id.image_button) as ImageView)
-                .setImageDrawable(ResourcesCompat.getDrawable(resources, getResourceId(x,y), null))
+                .setImageDrawable(ResourcesCompat.getDrawable(resources, getResourceId(x, y), null))
     }
 
     private fun getResourceId(x: Int, y: Int): Int {

@@ -8,6 +8,17 @@ import android.view.ViewGroup
 import com.msmikeescom.minesweeper.R
 
 class SettingsFragment : Fragment() {
+
+    companion object {
+        fun getInstance(position: Int): Fragment {
+            val bundle = Bundle()
+            bundle.putInt("pos", position)
+            val tabFragment = SettingsFragment()
+            tabFragment.arguments = bundle
+            return tabFragment
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
