@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:gravity="center"
-            android:fontFamily="@font/robot_reavers_normal"
+            android:fontFamily="@font/game_played"
             android:textColor="@color/text_color"
             android:textSize="18sp"
             android:lines="2"
@@ -52,10 +52,12 @@
         android:padding="6dp"
         android:background="@color/digital_color_bg">
         <!--COUNTER-->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1.2"
+            android:gravity="start"
+            android:orientation="horizontal"
             android:background="@color/digital_color_bg">
             <ImageView
                 android:id="@+id/counter_hundreds"
@@ -82,24 +84,19 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:src="@drawable/zero_digit" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-        <ImageView
-            android:id="@+id/settings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/settings"/>
+        </LinearLayout>
         <ImageView
             android:id="@+id/face"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_weight="0.6"
             android:src="@drawable/smile"/>
         <!--TIMER-->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.8"
+            android:layout_weight="1.2"
+            android:gravity="end"
             android:background="@color/digital_color_bg">
             <ImageView
                 android:id="@+id/tens_minutes"
@@ -142,17 +139,23 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:src="@drawable/zero_digit" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <GridLayout
-            android:id="@+id/mine_field"
+        android:layout_height="match_parent">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"/>
+            android:gravity="center">
+            <GridLayout
+                android:id="@+id/mine_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"/>
+        </LinearLayout>
     </ScrollView>
 
 </LinearLayout>

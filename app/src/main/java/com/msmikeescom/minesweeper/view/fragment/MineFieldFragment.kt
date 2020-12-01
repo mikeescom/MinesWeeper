@@ -46,7 +46,6 @@ class MineFieldFragment : Fragment() {
     private var sharedPreferences: SharedPreferences? = null
     private var mMineFiled: GridLayout? = null
     private var mFace: ImageView? = null
-    private var mSettings: ImageView? = null
     private var mProfileImage: ImageView? = null
     private var mProfileName: TextView? = null
     private var mCountDownTimer: CountDownTimer? = null
@@ -85,7 +84,7 @@ class MineFieldFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val displayMetrics: DisplayMetrics = resources.displayMetrics
-        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 136
+        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 140
         dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
         verticalSize = (dpHeight / 30)
         horizontalSize = (dpWidth / 30)
@@ -166,8 +165,6 @@ class MineFieldFragment : Fragment() {
         mMineFiled = view?.findViewById(R.id.mine_field)
         mFace = view?.findViewById(R.id.face)
         mFace?.setOnClickListener(View.OnClickListener { requireActivity().recreate() })
-        mSettings = view?.findViewById(R.id.settings)
-        mSettings?.setOnClickListener(View.OnClickListener { showSettingsPopupWindowClick(mMineFiled?.rootView) })
         updateCounter(mNumberOfMines)
     }
 

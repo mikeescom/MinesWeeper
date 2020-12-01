@@ -22,8 +22,9 @@ class TabbedActivity : AppCompatActivity() {
         viewPager.adapter = sectionsPagerAdapter
         tabs = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
-        tabs.getTabAt(0)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.user, null)
-        tabs.getTabAt(1)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.gamepad, null)
-        tabs.getTabAt(2)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.gear, null)
+        viewPager.setCurrentItem(1,true)
+        tabs.getTabAt(0)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.profile_icon, null)
+        tabs.getTabAt(1)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.game_pad_icon, null)
+        tabs.getTabAt(2)?.icon = ResourcesCompat.getDrawable(resources, R.drawable.settings_icon, null)
     }
 }

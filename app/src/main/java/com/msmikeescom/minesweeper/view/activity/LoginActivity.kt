@@ -114,10 +114,18 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
     override fun onStart() {
         super.onStart()
-        if (authStateListener != null) {
+        val opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient)
+        if (opr.isDone) {
+            val result = opr.get()
+            handleSignInResult(result)
+        } else {
+            opr.setResultCallback { handleSignInResult(it) }
+        }
+
+        /*if (authStateListener != null) {
             FirebaseAuth.getInstance().signOut()
         }
-        firebaseAuth!!.addAuthStateListener(authStateListener!!)
+        firebaseAuth!!.addAuthStateListener(authStateListener!!)*/
     }
 
     override fun onStop() {
