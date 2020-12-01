@@ -1,4 +1,4 @@
-package com.msmikeescom.minesweeper.ui
+package com.msmikeescom.minesweeper.view.fragment
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -7,11 +7,14 @@ import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnLongClickListener
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -19,15 +22,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.msmikeescom.minesweeper.R
-import com.msmikeescom.minesweeper.data.FieldObject
+import com.msmikeescom.minesweeper.model.FieldObject
+import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
+import com.msmikeescom.minesweeper.utilities.Constants.EIGHT
+import com.msmikeescom.minesweeper.utilities.Constants.EMPTY
+import com.msmikeescom.minesweeper.utilities.Constants.FIVE
+import com.msmikeescom.minesweeper.utilities.Constants.FOUR
+import com.msmikeescom.minesweeper.utilities.Constants.HARD_LEVEL_NUMBER_MINES
+import com.msmikeescom.minesweeper.utilities.Constants.MEDIUM_LEVEL_NUMBER_MINES
+import com.msmikeescom.minesweeper.utilities.Constants.MINE
+import com.msmikeescom.minesweeper.utilities.Constants.MINESWEEPER_PREFERENCES
+import com.msmikeescom.minesweeper.utilities.Constants.ONE
+import com.msmikeescom.minesweeper.utilities.Constants.SEVEN
+import com.msmikeescom.minesweeper.utilities.Constants.SIX
+import com.msmikeescom.minesweeper.utilities.Constants.SP_DIFFICULTY
+import com.msmikeescom.minesweeper.utilities.Constants.THREE
+import com.msmikeescom.minesweeper.utilities.Constants.TWO
+import com.msmikeescom.minesweeper.view.FaceType
 import java.time.LocalTime
 import java.util.*
 
-
-class MineFieldActivity : AppCompatActivity() {
-    private enum class FaceType {
-        ANGRY, HAPPY, KILLED, SCARED, SMILE
-    }
+class MineFieldFragment : Fragment() {
 
     private var sharedPreferences: SharedPreferences? = null
     private var mMineFiled: GridLayout? = null
@@ -45,22 +60,31 @@ class MineFieldActivity : AppCompatActivity() {
     private var gso: GoogleSignInOptions? = null
     private var dpHeight = 0
     private var dpWidth = 0
-    private var HORIZONTAL_SIZE = 0
-    private var VERTICAL_SIZE = 0
-    private var mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
+    private var horizontalSize = 0
+    private var verticalSize = 0
+    private var mFieldObjects = Array(horizontalSize) { arrayOfNulls<FieldObject>(verticalSize) }
+    private var difficulty: Int
+        get() = sharedPreferences!!.getInt(SP_DIFFICULTY, EASY_LEVEL_NUMBER_MINES)
+        private set(difficulty) {
+            val editor = sharedPreferences!!.edit()
+            editor.putInt(SP_DIFFICULTY, difficulty)
+            editor.apply()
+        }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mine_field)
+    companion object {
+        private const val TAG = "MineFieldFragment"
+    }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val displayMetrics: DisplayMetrics = resources.displayMetrics
         dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 136
         dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
-        VERTICAL_SIZE = (dpHeight / 30).toInt()
-        HORIZONTAL_SIZE = (dpWidth / 30).toInt()
-        mFieldObjects = Array(HORIZONTAL_SIZE) { arrayOfNulls<FieldObject>(VERTICAL_SIZE) }
-
+        verticalSize = (dpHeight / 30)
+        horizontalSize = (dpWidth / 30)
+        mFieldObjects = Array(horizontalSize) { arrayOfNulls(verticalSize) }
         getGoogleAccountResult()
+        return inflater.inflate(R.layout.fragment_mine_field, container, false)
     }
 
     override fun onStart() {
@@ -79,7 +103,7 @@ class MineFieldActivity : AppCompatActivity() {
                 .requestEmail()
                 .build()
 
-        googleApiClient = GoogleApiClient.Builder(this)
+        googleApiClient = GoogleApiClient.Builder(requireContext())
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso!!)
                 .build()
     }
@@ -99,30 +123,14 @@ class MineFieldActivity : AppCompatActivity() {
     }
 
     private fun initData() {
-        sharedPreferences = getSharedPreferences(MINESWEEPER_PREFERENCES, MODE_PRIVATE)
+        sharedPreferences = requireContext().getSharedPreferences(MINESWEEPER_PREFERENCES, AppCompatActivity.MODE_PRIVATE)
         mDefaultNumberOfMines = difficulty
         mNumberOfMines = mDefaultNumberOfMines
     }
 
-    private fun initView() {
-        mProfileImage = findViewById(R.id.profile_image)
-        mProfileName = findViewById(R.id.profile_name)
-        mMineFiled = findViewById(R.id.mine_field)
-        mFace = findViewById(R.id.face)
-        mFace?.setOnClickListener(View.OnClickListener { recreate() })
-        mSettings = findViewById(R.id.settings)
-        mSettings?.setOnClickListener(View.OnClickListener { showSettingsPopupWindowClick(mMineFiled?.rootView) })
-        updateCounter(mNumberOfMines)
-    }
-
-    private fun initProfile(account: GoogleSignInAccount) {
-        mProfileName?.text = account.displayName
-        Glide.with(this).load(account.photoUrl).into(mProfileImage!!);
-    }
-
     private fun initFieldObjectsArray() {
-        for (j in 0 until VERTICAL_SIZE) {
-            for (i in 0 until HORIZONTAL_SIZE) {
+        for (j in 0 until verticalSize) {
+            for (i in 0 until horizontalSize) {
                 mFieldObjects[i][j] = FieldObject(null, EMPTY)
             }
         }
@@ -134,8 +142,8 @@ class MineFieldActivity : AppCompatActivity() {
         var yMinePos: Int
         var i = 0
         while (i < mNumberOfMines) {
-            xMinePos = rand.nextInt(HORIZONTAL_SIZE)
-            yMinePos = rand.nextInt(VERTICAL_SIZE)
+            xMinePos = rand.nextInt(horizontalSize)
+            yMinePos = rand.nextInt(verticalSize)
             if (mFieldObjects[xMinePos][yMinePos]!!.squareImageToShow != MINE) {
                 mFieldObjects[xMinePos][yMinePos] = FieldObject(null, MINE)
                 i++
@@ -145,9 +153,41 @@ class MineFieldActivity : AppCompatActivity() {
         setUpFieldNumbers()
     }
 
+    private fun initView() {
+        mProfileImage = view?.findViewById(R.id.profile_image)
+        mProfileName = view?.findViewById(R.id.profile_name)
+        mMineFiled = view?.findViewById(R.id.mine_field)
+        mFace = view?.findViewById(R.id.face)
+        mFace?.setOnClickListener(View.OnClickListener { requireActivity().recreate() })
+        mSettings = view?.findViewById(R.id.settings)
+        mSettings?.setOnClickListener(View.OnClickListener { showSettingsPopupWindowClick(mMineFiled?.rootView) })
+        updateCounter(mNumberOfMines)
+    }
+
+    private fun initProfile(account: GoogleSignInAccount) {
+        mProfileName?.text = account.displayName
+        Glide.with(this).load(account.photoUrl).into(mProfileImage!!);
+    }
+
+    private fun initMineField() {
+        mMineFiled!!.columnCount = horizontalSize
+        mMineFiled!!.orientation = GridLayout.HORIZONTAL
+        for (j in 0 until verticalSize) {
+            for (i in 0 until horizontalSize) {
+                val squareView = layoutInflater.inflate(R.layout.square_layout, null)
+                val imageView = squareView.findViewById<ImageView>(R.id.image_button)
+                imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.covered, null))
+                mFieldObjects[i][j]!!.squareView = squareView
+                mMineFiled!!.addView(squareView)
+                setOnClickListener(i, j, mFieldObjects[i][j], imageView, getResourceId(i, j))
+                setOnLongClickListener(mFieldObjects[i][j], imageView)
+            }
+        }
+    }
+
     private fun setUpFieldNumbers() {
-        for (j in 0 until VERTICAL_SIZE) {
-            for (i in 0 until HORIZONTAL_SIZE) {
+        for (j in 0 until verticalSize) {
+            for (i in 0 until horizontalSize) {
                 if (mFieldObjects[i][j]!!.squareImageToShow == MINE) {
                     if (i - 1 >= 0 && j - 1 >= 0 && mFieldObjects[i - 1][j - 1]!!.squareImageToShow != MINE) { //Start Top position
                         mFieldObjects[i - 1][j - 1]!!.squareImageToShow = mFieldObjects[i - 1][j - 1]!!.squareImageToShow + 1
@@ -155,22 +195,22 @@ class MineFieldActivity : AppCompatActivity() {
                     if (i - 1 >= 0 && mFieldObjects[i - 1][j]!!.squareImageToShow != MINE) { //Start position
                         mFieldObjects[i - 1][j]!!.squareImageToShow = mFieldObjects[i - 1][j]!!.squareImageToShow + 1
                     }
-                    if (i - 1 >= 0 && j + 1 < VERTICAL_SIZE && mFieldObjects[i - 1][j + 1]!!.squareImageToShow != MINE) { //Start Bottom position
+                    if (i - 1 >= 0 && j + 1 < verticalSize && mFieldObjects[i - 1][j + 1]!!.squareImageToShow != MINE) { //Start Bottom position
                         mFieldObjects[i - 1][j + 1]!!.squareImageToShow = mFieldObjects[i - 1][j + 1]!!.squareImageToShow + 1
                     }
                     if (j - 1 >= 0 && mFieldObjects[i][j - 1]!!.squareImageToShow != MINE) { //Top position
                         mFieldObjects[i][j - 1]!!.squareImageToShow = mFieldObjects[i][j - 1]!!.squareImageToShow + 1
                     }
-                    if (i + 1 < HORIZONTAL_SIZE && j - 1 >= 0 && mFieldObjects[i + 1][j - 1]!!.squareImageToShow != MINE) { //Top End position
+                    if (i + 1 < horizontalSize && j - 1 >= 0 && mFieldObjects[i + 1][j - 1]!!.squareImageToShow != MINE) { //Top End position
                         mFieldObjects[i + 1][j - 1]!!.squareImageToShow = mFieldObjects[i + 1][j - 1]!!.squareImageToShow + 1
                     }
-                    if (i + 1 < HORIZONTAL_SIZE && mFieldObjects[i + 1][j]!!.squareImageToShow != MINE) { //End position
+                    if (i + 1 < horizontalSize && mFieldObjects[i + 1][j]!!.squareImageToShow != MINE) { //End position
                         mFieldObjects[i + 1][j]!!.squareImageToShow = mFieldObjects[i + 1][j]!!.squareImageToShow + 1
                     }
-                    if (i + 1 < HORIZONTAL_SIZE && j + 1 < VERTICAL_SIZE && mFieldObjects[i + 1][j + 1]!!.squareImageToShow != MINE) { //End Bottom position
+                    if (i + 1 < horizontalSize && j + 1 < verticalSize && mFieldObjects[i + 1][j + 1]!!.squareImageToShow != MINE) { //End Bottom position
                         mFieldObjects[i + 1][j + 1]!!.squareImageToShow = mFieldObjects[i + 1][j + 1]!!.squareImageToShow + 1
                     }
-                    if (j + 1 < VERTICAL_SIZE && mFieldObjects[i][j + 1]!!.squareImageToShow != MINE) { //Bottom position
+                    if (j + 1 < verticalSize && mFieldObjects[i][j + 1]!!.squareImageToShow != MINE) { //Bottom position
                         mFieldObjects[i][j + 1]!!.squareImageToShow = mFieldObjects[i][j + 1]!!.squareImageToShow + 1
                     }
                 }
@@ -193,7 +233,7 @@ class MineFieldActivity : AppCompatActivity() {
                 unCoverEmptySquares(xPos - 1, yPos)
             }
         }
-        if (xPos - 1 >= 0 && yPos + 1 < VERTICAL_SIZE && mFieldObjects[xPos - 1][yPos + 1]!!.squareImageToShow != MINE &&
+        if (xPos - 1 >= 0 && yPos + 1 < verticalSize && mFieldObjects[xPos - 1][yPos + 1]!!.squareImageToShow != MINE &&
                 mFieldObjects[xPos - 1][yPos + 1]!!.isCovered) { //Start Bottom position
             unCoverSquare(xPos - 1, yPos + 1)
             if (!isNumberOrMineSquare(mFieldObjects[xPos - 1][yPos + 1]!!.squareImageToShow)) {
@@ -207,28 +247,28 @@ class MineFieldActivity : AppCompatActivity() {
                 unCoverEmptySquares(xPos, yPos - 1)
             }
         }
-        if (xPos + 1 < HORIZONTAL_SIZE && yPos - 1 >= 0 && mFieldObjects[xPos + 1][yPos - 1]!!.squareImageToShow != MINE &&
+        if (xPos + 1 < horizontalSize && yPos - 1 >= 0 && mFieldObjects[xPos + 1][yPos - 1]!!.squareImageToShow != MINE &&
                 mFieldObjects[xPos + 1][yPos - 1]!!.isCovered) { //Top End position
             unCoverSquare(xPos + 1, yPos - 1)
             if (!isNumberOrMineSquare(mFieldObjects[xPos + 1][yPos - 1]!!.squareImageToShow)) {
                 unCoverEmptySquares(xPos + 1, yPos - 1)
             }
         }
-        if (xPos + 1 < HORIZONTAL_SIZE && mFieldObjects[xPos + 1][yPos]!!.squareImageToShow != MINE &&
+        if (xPos + 1 < horizontalSize && mFieldObjects[xPos + 1][yPos]!!.squareImageToShow != MINE &&
                 mFieldObjects[xPos + 1][yPos]!!.isCovered) { //End position
             unCoverSquare(xPos + 1, yPos)
             if (!isNumberOrMineSquare(mFieldObjects[xPos + 1][yPos]!!.squareImageToShow)) {
                 unCoverEmptySquares(xPos + 1, yPos)
             }
         }
-        if (xPos + 1 < HORIZONTAL_SIZE && yPos + 1 < VERTICAL_SIZE && mFieldObjects[xPos + 1][yPos + 1]!!.squareImageToShow != MINE &&
+        if (xPos + 1 < horizontalSize && yPos + 1 < verticalSize && mFieldObjects[xPos + 1][yPos + 1]!!.squareImageToShow != MINE &&
                 mFieldObjects[xPos + 1][yPos + 1]!!.isCovered) { //End Bottom position
             unCoverSquare(xPos + 1, yPos + 1)
             if (!isNumberOrMineSquare(mFieldObjects[xPos + 1][yPos + 1]!!.squareImageToShow)) {
                 unCoverEmptySquares(xPos + 1, yPos + 1)
             }
         }
-        if (yPos + 1 < VERTICAL_SIZE && mFieldObjects[xPos][yPos + 1]!!.squareImageToShow != MINE &&
+        if (yPos + 1 < verticalSize && mFieldObjects[xPos][yPos + 1]!!.squareImageToShow != MINE &&
                 mFieldObjects[xPos][yPos + 1]!!.isCovered) { //Bottom position
             unCoverSquare(xPos, yPos + 1)
             if (!isNumberOrMineSquare(mFieldObjects[xPos][yPos + 1]!!.squareImageToShow)) {
@@ -254,7 +294,8 @@ class MineFieldActivity : AppCompatActivity() {
 
     private fun unCoverSquare(x: Int, y: Int) {
         mFieldObjects[x][y]!!.isCovered = false
-        (mFieldObjects[x][y]!!.squareView?.findViewById<View>(R.id.image_button) as ImageView).setImageDrawable(resources.getDrawable(getResourceId(x, y)))
+        (mFieldObjects[x][y]!!.squareView?.findViewById<View>(R.id.image_button) as ImageView)
+                .setImageDrawable(ResourcesCompat.getDrawable(resources, getResourceId(x,y), null))
     }
 
     private fun getResourceId(x: Int, y: Int): Int {
@@ -274,22 +315,6 @@ class MineFieldActivity : AppCompatActivity() {
         return resourceId
     }
 
-    private fun initMineField() {
-        mMineFiled!!.columnCount = HORIZONTAL_SIZE
-        mMineFiled!!.orientation = GridLayout.HORIZONTAL
-        for (j in 0 until VERTICAL_SIZE) {
-            for (i in 0 until HORIZONTAL_SIZE) {
-                val squareView = layoutInflater.inflate(R.layout.square_layout, null)
-                val imageView = squareView.findViewById<ImageView>(R.id.image_button)
-                imageView.setImageDrawable(resources.getDrawable(R.drawable.covered))
-                mFieldObjects[i][j]!!.squareView = squareView
-                mMineFiled!!.addView(squareView)
-                setOnClickListener(i, j, mFieldObjects[i][j], imageView, getResourceId(i, j))
-                setOnLongClickListener(mFieldObjects[i][j], imageView)
-            }
-        }
-    }
-
     private fun setOnClickListener(xPos: Int, yPos: Int, fieldObject: FieldObject?, imageView: ImageView, resourceId: Int) {
         fieldObject!!.squareView?.setOnClickListener(View.OnClickListener {
             if (resourceId == R.drawable.uncovered) {
@@ -301,7 +326,7 @@ class MineFieldActivity : AppCompatActivity() {
                 stopTimer()
                 return@OnClickListener
             }
-            imageView.setImageDrawable(resources.getDrawable(resourceId))
+            imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, resourceId, null))
             if (!mTimerStarted) {
                 startTimer()
             }
@@ -309,12 +334,12 @@ class MineFieldActivity : AppCompatActivity() {
     }
 
     private fun setOnLongClickListener(fieldObject: FieldObject?, imageView: ImageView) {
-        fieldObject!!.squareView?.setOnLongClickListener(OnLongClickListener {
+        fieldObject!!.squareView?.setOnLongClickListener(View.OnLongClickListener {
             if (fieldObject.isFlagged) {
                 Log.i(TAG, "Square un flagged")
                 setFaceImage(FaceType.ANGRY, true)
                 mNumberOfMines++
-                imageView.setImageDrawable(resources.getDrawable(R.drawable.covered))
+                imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.covered, null))
                 fieldObject.isFlagged = false
                 updateCounter(mNumberOfMines)
                 return@OnLongClickListener true
@@ -334,7 +359,7 @@ class MineFieldActivity : AppCompatActivity() {
                         stopTimer()
                         return@OnLongClickListener true
                     }
-                    imageView.setImageDrawable(resources.getDrawable(R.drawable.flaged))
+                    imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.flaged, null))
                     fieldObject.isFlagged = true
                     updateCounter(mNumberOfMines)
                 }
@@ -344,8 +369,8 @@ class MineFieldActivity : AppCompatActivity() {
     }
 
     private fun uncoverAllSquares() {
-        for (j in 0 until VERTICAL_SIZE) {
-            for (i in 0 until HORIZONTAL_SIZE) {
+        for (j in 0 until verticalSize) {
+            for (i in 0 until horizontalSize) {
                 unCoverSquare(i, j)
                 mFieldObjects[i][j]!!.squareView?.setOnClickListener(null)
                 mFieldObjects[i][j]!!.squareView?.setOnLongClickListener(null)
@@ -356,10 +381,10 @@ class MineFieldActivity : AppCompatActivity() {
 
     private fun startTimer() {
         mTimerStarted = true
-        val tensMinutesImageView = findViewById<ImageView>(R.id.tens_minutes)
-        val unitsMinutesImageView = findViewById<ImageView>(R.id.units_minutes)
-        val tensSecondsImageView = findViewById<ImageView>(R.id.tens_seconds)
-        val unitsSecondsImageView = findViewById<ImageView>(R.id.units_seconds)
+        val tensMinutesImageView = view?.findViewById<ImageView>(R.id.tens_minutes)
+        val unitsMinutesImageView = view?.findViewById<ImageView>(R.id.units_minutes)
+        val tensSecondsImageView = view?.findViewById<ImageView>(R.id.tens_seconds)
+        val unitsSecondsImageView = view?.findViewById<ImageView>(R.id.units_seconds)
         mCountDownTimer = object : CountDownTimer(3600000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 Log.i(TAG, "millisUntilFinished: $millisUntilFinished")
@@ -374,26 +399,26 @@ class MineFieldActivity : AppCompatActivity() {
                 seconds = mChronometerTime - minutes * 60
                 if (mChronometerTime % 60 != 0) {
                     val units = seconds % 10
-                    seconds = seconds / 10
+                    seconds /= 10
                     val tens = seconds % 10
-                    setImageNumber(unitsSecondsImageView, units)
-                    setImageNumber(tensSecondsImageView, tens)
+                    unitsSecondsImageView?.let { setImageNumber(it, units) }
+                    tensSecondsImageView?.let { setImageNumber(it, tens) }
                 } else {
                     val units = minutes % 10
-                    minutes = minutes / 10
+                    minutes /= 10
                     val tens = minutes % 10
-                    setImageNumber(unitsMinutesImageView, units)
-                    setImageNumber(tensMinutesImageView, tens)
-                    setImageNumber(unitsSecondsImageView, 0)
-                    setImageNumber(tensSecondsImageView, 0)
+                    unitsMinutesImageView?.let { setImageNumber(it, units) }
+                    tensMinutesImageView?.let { setImageNumber(it, tens) }
+                    unitsSecondsImageView?.let { setImageNumber(it, 0) }
+                    tensSecondsImageView?.let { setImageNumber(it, 0) }
                 }
             }
 
             override fun onFinish() {
-                setImageNumber(unitsMinutesImageView, 0)
-                setImageNumber(tensMinutesImageView, 0)
-                setImageNumber(unitsSecondsImageView, 0)
-                setImageNumber(tensSecondsImageView, 0)
+                unitsMinutesImageView?.let { setImageNumber(it, 0) }
+                tensMinutesImageView?.let { setImageNumber(it, 0) }
+                unitsSecondsImageView?.let { setImageNumber(it, 0) }
+                tensSecondsImageView?.let { setImageNumber(it, 0) }
             }
         }
         mCountDownTimer?.start()
@@ -407,31 +432,31 @@ class MineFieldActivity : AppCompatActivity() {
 
     private fun updateCounter(number: Int) {
         var number = number
-        val hundredsImageView = findViewById<ImageView>(R.id.counter_hundreds)
-        val tensImageView = findViewById<ImageView>(R.id.counter_tens)
-        val unitsImageView = findViewById<ImageView>(R.id.counter_units)
+        val hundredsImageView = view?.findViewById<ImageView>(R.id.counter_hundreds)
+        val tensImageView = view?.findViewById<ImageView>(R.id.counter_tens)
+        val unitsImageView = view?.findViewById<ImageView>(R.id.counter_units)
         val units = number % 10
-        number = number / 10
+        number /= 10
         val tens = number % 10
-        number = number / 10
+        number /= 10
         val hundreds = number % 10
-        setImageNumber(unitsImageView, units)
-        setImageNumber(tensImageView, tens)
-        setImageNumber(hundredsImageView, hundreds)
+        unitsImageView?.let { setImageNumber(it, units) }
+        tensImageView?.let { setImageNumber(it, tens) }
+        hundredsImageView?.let { setImageNumber(it, hundreds) }
     }
 
     private fun setImageNumber(imageView: ImageView, digit: Int) {
         when (digit) {
-            0 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.zero_digit))
-            1 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.one_digit))
-            2 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.two_digit))
-            3 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.three_digit))
-            4 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.four_digit))
-            5 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.five_digit))
-            6 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.six_digit))
-            7 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.seven_digit))
-            8 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.eight_digit))
-            9 -> imageView.setImageDrawable(resources.getDrawable(R.drawable.nine_digit))
+            0 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.zero_digit, null))
+            1 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.one_digit, null))
+            2 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.two_digit, null))
+            3 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.three_digit, null))
+            4 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.four_digit, null))
+            5 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.five_digit, null))
+            6 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.six_digit, null))
+            7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.seven_digit, null))
+            8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.eight_digit, null))
+            9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.nine_digit, null))
         }
     }
 
@@ -444,37 +469,29 @@ class MineFieldActivity : AppCompatActivity() {
             FaceType.SCARED -> R.drawable.scared
             FaceType.SMILE -> R.drawable.smile
         }
-        mFace!!.setImageDrawable(resources.getDrawable(resource))
+        mFace!!.setImageDrawable(ResourcesCompat.getDrawable(resources, resource, null))
         if (keepSmiling) {
-            Handler().postDelayed({ mFace!!.setImageDrawable(resources.getDrawable(R.drawable.smile)) }, 500)
+            Handler().postDelayed({ mFace!!.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.smile, null)) }, 500)
         }
     }
-
-    private var difficulty: Int
-        get() = sharedPreferences!!.getInt(SP_DIFFICULTY, EASY_LEVEL_NUMBER_MINES)
-        private set(difficulty) {
-            val editor = sharedPreferences!!.edit()
-            editor.putInt(SP_DIFFICULTY, difficulty)
-            editor.commit()
-        }
 
     private fun dismissSettingsPopupWindow(popupWindow: PopupWindow, difficulty: Int, updateDifficulty: Boolean) {
         var toastText = ""
         popupWindow.dismiss()
         if (updateDifficulty) {
             this.difficulty = difficulty
-            recreate()
+            requireActivity().recreate()
             when (difficulty) {
                 EASY_LEVEL_NUMBER_MINES -> toastText = "Easy level"
                 MEDIUM_LEVEL_NUMBER_MINES -> toastText = "Medium level"
                 HARD_LEVEL_NUMBER_MINES -> toastText = "Hard level"
             }
-            Toast.makeText(this, toastText, Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), toastText, Toast.LENGTH_LONG).show()
         }
     }
 
-    fun showSettingsPopupWindowClick(view: View?) {
-        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private fun showSettingsPopupWindowClick(view: View?) {
+        val inflater = requireContext().getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_windows_settings_layout, null)
         val easy = popupView.findViewById<ImageView>(R.id.easy)
         val medium = popupView.findViewById<ImageView>(R.id.medium)
@@ -489,14 +506,14 @@ class MineFieldActivity : AppCompatActivity() {
         medium.setOnClickListener { dismissSettingsPopupWindow(popupWindow, MEDIUM_LEVEL_NUMBER_MINES, true) }
         difficult.setOnClickListener { dismissSettingsPopupWindow(popupWindow, HARD_LEVEL_NUMBER_MINES, true) }
         cancel.setOnClickListener { dismissSettingsPopupWindow(popupWindow, EASY_LEVEL_NUMBER_MINES, false) }
-        popupView.setOnTouchListener { v, event ->
+        popupView.setOnTouchListener { _, _ ->
             dismissSettingsPopupWindow(popupWindow, EASY_LEVEL_NUMBER_MINES, false)
             true
         }
     }
 
-    fun showFinishedGamePopupWindowClick(view: View?) {
-        val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private fun showFinishedGamePopupWindowClick(view: View?) {
+        val inflater = requireContext().getSystemService(AppCompatActivity.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         val popupView = inflater.inflate(R.layout.popup_windows_finished_game_layout, null)
         val playAgain = popupView.findViewById<Button>(R.id.play_again)
         val finishTime = popupView.findViewById<TextView>(R.id.finish_time)
@@ -509,28 +526,10 @@ class MineFieldActivity : AppCompatActivity() {
         finishTime.text = resources.getString(R.string.your_time_was, time)
         popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0)
         playAgain.setOnClickListener { dismissSettingsPopupWindow(popupWindow, difficulty, true) }
-        popupView.setOnTouchListener { v, event ->
+        popupView.setOnTouchListener { _, _ ->
             dismissSettingsPopupWindow(popupWindow, difficulty, true)
             true
         }
     }
 
-    companion object {
-        private const val TAG = "MineFieldActivity"
-        private const val MINESWEEPER_PREFERENCES = "MINESWEEPER_PREFERENCES"
-        private const val SP_DIFFICULTY = "SP_DIFFICULTY"
-        private const val EASY_LEVEL_NUMBER_MINES = 36
-        private const val MEDIUM_LEVEL_NUMBER_MINES = 51
-        private const val HARD_LEVEL_NUMBER_MINES = 66
-        private const val EMPTY = 0
-        private const val MINE = 9
-        private const val ONE = 1
-        private const val TWO = 2
-        private const val THREE = 3
-        private const val FOUR = 4
-        private const val FIVE = 5
-        private const val SIX = 6
-        private const val SEVEN = 7
-        private const val EIGHT = 8
-    }
 }

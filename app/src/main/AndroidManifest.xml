@@ -11,8 +11,12 @@
         android:roundIcon="@drawable/mine"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".view.activity.MainActivity"
+            android:label="@string/title_activity_mine_field"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.SplashActivity"
+            android:name=".view.activity.SplashActivity"
             android:label="@string/title_activity_mine_field"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
@@ -23,12 +27,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.LoginActivity"
-            android:label="@string/title_activity_mine_field"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"/>
-        <activity
-            android:name=".ui.MineFieldActivity"
+            android:name=".view.activity.LoginActivity"
             android:label="@string/title_activity_mine_field"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />

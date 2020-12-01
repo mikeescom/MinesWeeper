@@ -4,4 +4,10 @@
     <string name="title_activity_mine_field">MineField</string>
     <string name="your_time_was">Your time was %1$s</string>
     <string name="web_client_id">1030588939299-fetddoc7imnrhd7395ilk3ti0rcb0lfh.apps.googleusercontent.com</string>
+    <string name="profile_title">Profile</string>
+    <string name="mine_field_title">Mine Field</string>
+    <string name="settings_title">Settings</string>
+    <string name="leader_board_title">Leader Board</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.msmikeescom.minesweeper.ui
+package com.msmikeescom.minesweeper.view.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -106,7 +106,7 @@ class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedLis
 
 
     private fun gotoMineField() {
-        val intent = Intent(this, MineFieldActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
