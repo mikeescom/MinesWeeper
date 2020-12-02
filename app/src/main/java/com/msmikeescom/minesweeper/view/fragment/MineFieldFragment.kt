@@ -1,9 +1,9 @@
 package com.msmikeescom.minesweeper.view.fragment
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
@@ -16,10 +16,12 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.auth.api.signin.GoogleSignInResult
 import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.ResultCallback
+import com.google.android.gms.common.api.Status
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.model.FieldObject
 import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
@@ -37,7 +39,7 @@ import com.msmikeescom.minesweeper.utilities.Constants.SIX
 import com.msmikeescom.minesweeper.utilities.Constants.SP_DIFFICULTY
 import com.msmikeescom.minesweeper.utilities.Constants.THREE
 import com.msmikeescom.minesweeper.utilities.Constants.TWO
-import com.msmikeescom.minesweeper.view.FaceType
+import com.msmikeescom.minesweeper.view.activity.LoginActivity
 import java.time.LocalTime
 import java.util.*
 
@@ -45,7 +47,8 @@ class MineFieldFragment : Fragment() {
 
     private var sharedPreferences: SharedPreferences? = null
     private var mMineFiled: GridLayout? = null
-    private var mFace: ImageView? = null
+    private var mExit: ImageView? = null
+    private var mNew: ImageView? = null
     private var mProfileImage: ImageView? = null
     private var mProfileName: TextView? = null
     private var mCountDownTimer: CountDownTimer? = null
@@ -95,17 +98,15 @@ class MineFieldFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        val opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient)
-        if (opr.isDone) {
-            val result = opr.get()
-            handleSignInResult(result)
-        } else {
-            opr.setResultCallback { handleSignInResult(it) }
+        googleApiClient?.connect()
+        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
+        if (account != null) {
+            handleSignInResult(account)
         }
     }
 
     private fun getGoogleAccountResult () {
-        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
                 .requestEmail()
                 .build()
 
@@ -114,17 +115,12 @@ class MineFieldFragment : Fragment() {
                 .build()
     }
 
-    private fun handleSignInResult(result: GoogleSignInResult) {
-        var account : GoogleSignInAccount? = null
-        if (result.isSuccess) {
-            account = result.signInAccount
-            Log.i(TAG, "Name: " + account?.familyName)
-        }
+    private fun handleSignInResult(account: GoogleSignInAccount) {
         initData()
         initFieldObjectsArray()
         buildMineFiled()
         initView()
-        initProfile(account!!)
+        initProfile(account)
         initMineField()
     }
 
@@ -163,8 +159,16 @@ class MineFieldFragment : Fragment() {
         mProfileImage = view?.findViewById(R.id.profile_image)
         mProfileName = view?.findViewById(R.id.profile_name)
         mMineFiled = view?.findViewById(R.id.mine_field)
-        mFace = view?.findViewById(R.id.face)
-        mFace?.setOnClickListener(View.OnClickListener { requireActivity().recreate() })
+        mNew = view?.findViewById(R.id.new_icon)
+        mExit = view?.findViewById(R.id.exit_icon)
+        mNew?.setOnClickListener { requireActivity().recreate() }
+        mExit?.setOnClickListener {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback {
+                val status = it;
+                val intent = Intent(requireActivity(), LoginActivity::class.java)
+                startActivity(intent)
+            }
+        }
         updateCounter(mNumberOfMines)
     }
 
@@ -322,10 +326,10 @@ class MineFieldFragment : Fragment() {
     private fun setOnClickListener(xPos: Int, yPos: Int, fieldObject: FieldObject?, imageView: ImageView, resourceId: Int) {
         fieldObject!!.squareView?.setOnClickListener(View.OnClickListener {
             if (resourceId == R.drawable.uncovered) {
-                setFaceImage(FaceType.SCARED, true)
+                //setFaceImage(FaceType.SCARED, true)
                 unCoverEmptySquares(xPos, yPos)
             } else if (resourceId == R.drawable.mine) {
-                setFaceImage(FaceType.KILLED, false)
+                //setFaceImage(FaceType.KILLED, false)
                 uncoverAllSquares()
                 stopTimer()
                 return@OnClickListener
@@ -341,7 +345,7 @@ class MineFieldFragment : Fragment() {
         fieldObject!!.squareView?.setOnLongClickListener(View.OnLongClickListener {
             if (fieldObject.isFlagged) {
                 Log.i(TAG, "Square un flagged")
-                setFaceImage(FaceType.ANGRY, true)
+                //setFaceImage(FaceType.ANGRY, true)
                 mNumberOfMines++
                 imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.covered, null))
                 fieldObject.isFlagged = false
@@ -350,7 +354,7 @@ class MineFieldFragment : Fragment() {
             }
             if (fieldObject.isCovered) {
                 Log.i(TAG, "Square flagged")
-                setFaceImage(FaceType.SCARED, true)
+                //setFaceImage(FaceType.SCARED, true)
                 mNumberOfMines--
                 if (mNumberOfMines >= 0) {
                     if (fieldObject.squareImageToShow == MINE) {
@@ -358,7 +362,7 @@ class MineFieldFragment : Fragment() {
                     }
                     if (mMinesFound == mDefaultNumberOfMines) {
                         Log.i(TAG, "You won!$mMinesFound")
-                        setFaceImage(FaceType.HAPPY, false)
+                        //setFaceImage(FaceType.HAPPY, false)
                         showFinishedGamePopupWindowClick(mMineFiled!!.rootView)
                         stopTimer()
                         return@OnLongClickListener true
@@ -461,21 +465,6 @@ class MineFieldFragment : Fragment() {
             7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.seven_digit, null))
             8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.eight_digit, null))
             9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.nine_digit, null))
-        }
-    }
-
-    private fun setFaceImage(faceType: FaceType, keepSmiling: Boolean) {
-        var resource = 0
-        resource = when (faceType) {
-            FaceType.ANGRY -> R.drawable.angry
-            FaceType.HAPPY -> R.drawable.happy
-            FaceType.KILLED -> R.drawable.killed
-            FaceType.SCARED -> R.drawable.scared
-            FaceType.SMILE -> R.drawable.smile
-        }
-        mFace!!.setImageDrawable(ResourcesCompat.getDrawable(resources, resource, null))
-        if (keepSmiling) {
-            Handler().postDelayed({ mFace!!.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.smile, null)) }, 500)
         }
     }
 

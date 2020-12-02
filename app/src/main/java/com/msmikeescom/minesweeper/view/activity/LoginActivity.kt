@@ -1,12 +1,9 @@
 package com.msmikeescom.minesweeper.view.activity
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -20,6 +17,7 @@ import com.msmikeescom.minesweeper.R
 
 class LoginActivity : AppCompatActivity() {
 
+    private val RC_SIGN_IN: Int = 1001
     private lateinit var mGoogleSignInClient : GoogleSignInClient
     private lateinit var mSignInButton : SignInButton
     private lateinit var mSignInInstruction : TextView
@@ -62,17 +60,15 @@ class LoginActivity : AppCompatActivity() {
 
     private fun signIn() {
         val signInIntent = mGoogleSignInClient.signInIntent
+        startActivityForResult(signInIntent, RC_SIGN_IN)
+    }
 
-        val startForResult = registerForActivityResult(StartActivityForResult()) {
-            result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                val task = GoogleSignIn.getSignedInAccountFromIntent(intent)
-                handleSignInResult(task)
-            }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode === RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            handleSignInResult(task)
         }
-
-        startForResult.launch(signInIntent)
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
