@@ -84,7 +84,7 @@ class MineFieldFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val displayMetrics: DisplayMetrics = resources.displayMetrics
-        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 140
+        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 200
         dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
         verticalSize = (dpHeight / 30)
         horizontalSize = (dpWidth / 30)

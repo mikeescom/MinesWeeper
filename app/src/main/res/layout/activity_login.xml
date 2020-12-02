@@ -7,7 +7,7 @@
     tools:context="com.msmikeescom.minesweeper.view.activity.LoginActivity">
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/sign_in_instruction"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -16,7 +16,10 @@
         android:textStyle="bold"
         android:textColor="@color/text_color"
         android:textSize="20sp"
-        android:text="Sign in to start to play." />
+        android:text="Sign in to start to play."
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
@@ -26,7 +29,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
     </com.google.android.gms.common.SignInButton>
 

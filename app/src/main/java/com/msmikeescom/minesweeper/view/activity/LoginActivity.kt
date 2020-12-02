@@ -1,137 +1,86 @@
 package com.msmikeescom.minesweeper.view.activity
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
+import android.view.View
+import android.widget.TextView
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.gms.auth.api.Auth
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.auth.api.signin.GoogleSignInResult
-import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.SignInButton
-import com.google.android.gms.common.api.GoogleApiClient
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuth.AuthStateListener
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.msmikeescom.minesweeper.R
 
 
-class LoginActivity : AppCompatActivity(), GoogleApiClient.OnConnectionFailedListener {
+class LoginActivity : AppCompatActivity() {
 
-    companion object {
-        private const val TAG = "LoginActivity"
-        private var signInButton: SignInButton? = null
-        private var googleApiClient: GoogleApiClient? = null
-        private const val RC_SIGN_IN = 1
-        var name: String? = null
-        var email: String? = null
-        var idToken: String? = null
-        private var firebaseAuth: FirebaseAuth? = null
-        private var authStateListener: AuthStateListener? = null
-    }
+    private lateinit var mGoogleSignInClient : GoogleSignInClient
+    private lateinit var mSignInButton : SignInButton
+    private lateinit var mSignInInstruction : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        firebaseAuth = FirebaseAuth.getInstance()
-        authStateListener = AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-
-            if (user != null) {
-                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.uid)
-            } else {
-                Log.d(TAG, "onAuthStateChanged:signed_out")
+        mSignInButton = findViewById(R.id.sign_in_button)
+        mSignInButton.setSize(SignInButton.SIZE_STANDARD);
+        mSignInButton.setOnClickListener {
+            when (it.id) {
+                R.id.sign_in_button -> signIn()
             }
         }
+        mSignInInstruction = findViewById(R.id.sign_in_instruction)
 
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.web_client_id))
                 .requestEmail()
                 .build()
-        googleApiClient = GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build()
 
-        signInButton = findViewById(R.id.sign_in_button)
-        signInButton?.setOnClickListener {
-            val intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient)
-            startActivityForResult(intent, RC_SIGN_IN)
-        }
-    }
-
-    override fun onConnectionFailed(connectionResult: ConnectionResult) {
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
-            handleSignInResult(result)
-        }
-    }
-
-    private fun handleSignInResult(result: GoogleSignInResult?) {
-        if (result!!.isSuccess) {
-            val account = result.signInAccount
-            idToken = account!!.idToken
-            name = account.displayName
-            email = account.email
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            firebaseAuthWithGoogle(credential)
-        } else {
-            Log.e(TAG, "Login Unsuccessful. $result")
-            Toast.makeText(this, "Login Unsuccessful", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(credential: AuthCredential) {
-        firebaseAuth!!.signInWithCredential(credential)
-                .addOnCompleteListener(this) { task ->
-                    Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful)
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
-                        gotoMineField()
-                    } else {
-                        Log.w(TAG, "signInWithCredential" + task.exception!!.message)
-                        task.exception!!.printStackTrace()
-                        Toast.makeText(this, "Authentication failed.",
-                                Toast.LENGTH_SHORT).show()
-                    }
-                }
-    }
-
-
-    private fun gotoMineField() {
-        val intent = Intent(this, TabbedActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
     }
 
     override fun onStart() {
         super.onStart()
-        val opr = Auth.GoogleSignInApi.silentSignIn(googleApiClient)
-        if (opr.isDone) {
-            val result = opr.get()
-            handleSignInResult(result)
-        } else {
-            opr.setResultCallback { handleSignInResult(it) }
-        }
-
-        /*if (authStateListener != null) {
-            FirebaseAuth.getInstance().signOut()
-        }
-        firebaseAuth!!.addAuthStateListener(authStateListener!!)*/
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        updateUI(account)
     }
 
-    override fun onStop() {
-        super.onStop()
-        if (authStateListener != null) {
-            firebaseAuth!!.removeAuthStateListener(authStateListener!!)
+    private fun updateUI(googleSignInAccount: GoogleSignInAccount?) {
+        if (googleSignInAccount == null) {
+            mSignInInstruction.visibility = View.VISIBLE
+            mSignInButton.visibility = View.VISIBLE
+        } else {
+            val intent = Intent(this, TabbedActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun signIn() {
+        val signInIntent = mGoogleSignInClient.signInIntent
+
+        val startForResult = registerForActivityResult(StartActivityForResult()) {
+            result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                val task = GoogleSignIn.getSignedInAccountFromIntent(intent)
+                handleSignInResult(task)
+            }
+        }
+
+        startForResult.launch(signInIntent)
+    }
+
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            updateUI(account)
+        } catch (e: ApiException) {
+            updateUI(null)
         }
     }
 }
