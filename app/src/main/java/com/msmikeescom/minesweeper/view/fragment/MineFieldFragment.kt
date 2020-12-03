@@ -20,8 +20,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.GoogleApiClient
-import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.common.api.Status
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.model.FieldObject
 import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
@@ -42,6 +40,7 @@ import com.msmikeescom.minesweeper.utilities.Constants.TWO
 import com.msmikeescom.minesweeper.view.activity.LoginActivity
 import java.time.LocalTime
 import java.util.*
+
 
 class MineFieldFragment : Fragment() {
 
@@ -87,11 +86,12 @@ class MineFieldFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val displayMetrics: DisplayMetrics = resources.displayMetrics
-        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 200
-        dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 220
+        dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt() - 10
         verticalSize = (dpHeight / 30)
         horizontalSize = (dpWidth / 30)
         mFieldObjects = Array(horizontalSize) { arrayOfNulls(verticalSize) }
+
         getGoogleAccountResult()
         return inflater.inflate(R.layout.fragment_mine_field, container, false)
     }
@@ -440,7 +440,6 @@ class MineFieldFragment : Fragment() {
 
     private fun updateCounter(number: Int) {
         var number = number
-        val hundredsImageView = view?.findViewById<ImageView>(R.id.counter_hundreds)
         val tensImageView = view?.findViewById<ImageView>(R.id.counter_tens)
         val unitsImageView = view?.findViewById<ImageView>(R.id.counter_units)
         val units = number % 10
@@ -450,21 +449,20 @@ class MineFieldFragment : Fragment() {
         val hundreds = number % 10
         unitsImageView?.let { setImageNumber(it, units) }
         tensImageView?.let { setImageNumber(it, tens) }
-        hundredsImageView?.let { setImageNumber(it, hundreds) }
     }
 
     private fun setImageNumber(imageView: ImageView, digit: Int) {
         when (digit) {
-            0 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.zero_digit, null))
-            1 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.one_digit, null))
-            2 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.two_digit, null))
-            3 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.three_digit, null))
-            4 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.four_digit, null))
-            5 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.five_digit, null))
-            6 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.six_digit, null))
-            7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.seven_digit, null))
-            8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.eight_digit, null))
-            9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.nine_digit, null))
+            0 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_0, null))
+            1 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_1, null))
+            2 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_2, null))
+            3 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_3, null))
+            4 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_4, null))
+            5 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_5, null))
+            6 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_6, null))
+            7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_7, null))
+            8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_8, null))
+            9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_9, null))
         }
     }
 

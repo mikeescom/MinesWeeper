@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@color/splash_color_bg" />
+    <item android:drawable="@color/DDB2F7" />
 
     <item>
-        <bitmap android:src="@drawable/mine_face"
+        <bitmap android:src="@drawable/splash_mine"
             android:gravity="center" />
 
     </item>

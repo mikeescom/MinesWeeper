@@ -4,6 +4,14 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
 
+
+    <color name="FFEAA6">#FFEAA6</color>
+    <color name="B1E5F6">#B1E5F6</color>
+    <color name="B2F5F2">#B2F5F2</color>
+    <color name="DDB2F7">#DDB2F7</color>
+    <color name="F4B2C0">#F4B2C0</color>
+
+
     <color name="tabbed_activity_color_bg">#a8dadc</color>
     <color name="digital_color_bg">#1d3557</color>
     <color name="text_color">#a8dadc</color>

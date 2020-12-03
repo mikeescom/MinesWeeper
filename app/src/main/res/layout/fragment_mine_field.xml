@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/digital_color_bg"
+    android:background="@color/FFEAA6"
     tools:context=".view.fragment.MineFieldFragment">
 
     <LinearLayout
@@ -14,9 +14,8 @@
         android:orientation="horizontal"
         android:padding="7dp">
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_weight="1"
             android:gravity="center"
             android:layout_marginEnd="10dp">
             <androidx.cardview.widget.CardView
@@ -37,7 +36,7 @@
             android:layout_weight="4"
             android:gravity="center"
             android:fontFamily="@font/game_played"
-            android:textColor="@color/text_color"
+            android:textColor="@color/digital_color_bg"
             android:textSize="18sp"
             android:lines="2"
             tools:text="Miguel Saavedra Lozano"/>
@@ -58,80 +57,70 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="6dp"
-        android:background="@color/digital_color_bg">
+        android:background="@color/FFEAA6">
         <!--COUNTER-->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1.2"
             android:gravity="start"
             android:orientation="horizontal"
-            android:background="@color/digital_color_bg">
-            <ImageView
-                android:id="@+id/counter_hundreds"
-                android:layout_width="30dp"
-                android:layout_height="49dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit"/>
+            android:background="@color/FFEAA6">
             <ImageView
                 android:id="@+id/counter_tens"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toEndOf="@+id/counter_hundreds"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit" />
+                android:src="@drawable/digit_0" />
             <ImageView
                 android:id="@+id/counter_units"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toEndOf="@+id/counter_tens"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit" />
+                android:src="@drawable/digit_0" />
         </LinearLayout>
         <ImageView
             android:id="@+id/new_icon"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.6"
+            android:layout_marginStart="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/ic_new"/>
         <ImageView
             android:id="@+id/pause_icon"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.6"
+            android:layout_marginEnd="10dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/ic_pause"/>
         <!--TIMER-->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1.2"
             android:gravity="end"
-            android:background="@color/digital_color_bg">
+            android:background="@color/FFEAA6">
             <ImageView
                 android:id="@+id/tens_minutes"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit"/>
+                android:src="@drawable/digit_0"/>
             <ImageView
                 android:id="@+id/units_minutes"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toEndOf="@+id/tens_minutes"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit"/>
+                android:src="@drawable/digit_0"/>
             <ImageView
                 android:id="@+id/clock_divider"
                 android:layout_width="5dp"
@@ -139,24 +128,24 @@
                 app:layout_constraintStart_toEndOf="@+id/units_minutes"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit"/>
+                android:src="@drawable/digit_0"/>
             <ImageView
                 android:id="@+id/tens_seconds"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toEndOf="@+id/clock_divider"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit" />
+                android:src="@drawable/digit_0" />
             <ImageView
                 android:id="@+id/units_seconds"
-                android:layout_width="30dp"
+                android:layout_width="40dp"
                 android:layout_height="49dp"
                 app:layout_constraintStart_toEndOf="@+id/tens_seconds"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:src="@drawable/zero_digit" />
+                android:src="@drawable/digit_0" />
         </LinearLayout>
     </LinearLayout>
 
@@ -165,7 +154,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:layout_margin="5dp"/>
 
 </LinearLayout>
