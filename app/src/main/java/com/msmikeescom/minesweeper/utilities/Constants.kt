@@ -3,9 +3,16 @@ package com.msmikeescom.minesweeper.utilities
 object Constants {
 
     const val SP_DIFFICULTY = "SP_DIFFICULTY"
-    const val EASY_LEVEL_NUMBER_MINES = 36
-    const val MEDIUM_LEVEL_NUMBER_MINES = 51
-    const val HARD_LEVEL_NUMBER_MINES = 66
+    const val SP_MINE_SIZE_W = "SP_MINE_SIZE_W"
+    const val SP_MINE_SIZE_H = "SP_MINE_SIZE_H"
+
+    const val MINE_FILED_DEFAULT_SIZE_W = 10
+    const val MINE_FILED_DEFAULT_SIZE_H = 12
+
+    const val EASY_LEVEL_NUMBER_MINES = 30
+    const val MEDIUM_LEVEL_NUMBER_MINES = 50
+    const val HARD_LEVEL_NUMBER_MINES = 70
+
     const val EMPTY = 0
     const val MINE = 9
     const val ONE = 1

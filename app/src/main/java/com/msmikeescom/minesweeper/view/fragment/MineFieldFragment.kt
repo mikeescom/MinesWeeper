@@ -37,6 +37,7 @@ import com.msmikeescom.minesweeper.utilities.Constants.SIX
 import com.msmikeescom.minesweeper.utilities.Constants.SP_DIFFICULTY
 import com.msmikeescom.minesweeper.utilities.Constants.THREE
 import com.msmikeescom.minesweeper.utilities.Constants.TWO
+import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
 import com.msmikeescom.minesweeper.view.activity.LoginActivity
 import java.time.LocalTime
 import java.util.*
@@ -44,7 +45,6 @@ import java.util.*
 
 class MineFieldFragment : Fragment() {
 
-    private var sharedPreferences: SharedPreferences? = null
     private var mMineFiled: GridLayout? = null
     private var mExit: ImageView? = null
     private var mNew: ImageView? = null
@@ -63,12 +63,23 @@ class MineFieldFragment : Fragment() {
     private var horizontalSize = 0
     private var verticalSize = 0
     private var mFieldObjects = Array(horizontalSize) { arrayOfNulls<FieldObject>(verticalSize) }
+
     private var difficulty: Int
-        get() = sharedPreferences!!.getInt(SP_DIFFICULTY, EASY_LEVEL_NUMBER_MINES)
-        private set(difficulty) {
-            val editor = sharedPreferences!!.edit()
-            editor.putInt(SP_DIFFICULTY, difficulty)
-            editor.apply()
+    get() = SharePreferencesHelper.getInstance().difficulty
+    private set(difficulty) {
+        SharePreferencesHelper.getInstance().putDifficulty(difficulty)
+    }
+
+    private var mineFieldSizeW: Int
+        get() = SharePreferencesHelper.getInstance().mineFieldSizeW
+        private set(mineFieldSizeW) {
+            SharePreferencesHelper.getInstance().putMineFieldSizeW(mineFieldSizeW)
+        }
+
+    private var mineFieldSizeH: Int
+        get() = SharePreferencesHelper.getInstance().mineFieldSizeH
+        private set(mineFieldSizeH) {
+            SharePreferencesHelper.getInstance().putMineFieldSizeH(mineFieldSizeH)
         }
 
     companion object {
@@ -88,8 +99,15 @@ class MineFieldFragment : Fragment() {
         val displayMetrics: DisplayMetrics = resources.displayMetrics
         dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 220
         dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt() - 10
-        verticalSize = (dpHeight / 30)
-        horizontalSize = (dpWidth / 30)
+
+        if (mineFieldSizeW == 0 && mineFieldSizeH == 0) {
+            verticalSize = (dpHeight / 30)
+            horizontalSize = (dpWidth / 30)
+        } else {
+            verticalSize = mineFieldSizeW
+            horizontalSize = mineFieldSizeH
+        }
+
         mFieldObjects = Array(horizontalSize) { arrayOfNulls(verticalSize) }
 
         getGoogleAccountResult()
@@ -125,7 +143,6 @@ class MineFieldFragment : Fragment() {
     }
 
     private fun initData() {
-        sharedPreferences = requireContext().getSharedPreferences(MINESWEEPER_PREFERENCES, AppCompatActivity.MODE_PRIVATE)
         mDefaultNumberOfMines = difficulty
         mNumberOfMines = mDefaultNumberOfMines
     }

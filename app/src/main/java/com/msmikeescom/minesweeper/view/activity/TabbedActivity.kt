@@ -25,7 +25,7 @@ class TabbedActivity : AppCompatActivity() {
         viewPager.adapter = sectionsPagerAdapter
         tabs = findViewById(R.id.tabs)
         tabs.setupWithViewPager(viewPager)
-        viewPager.setCurrentItem(1, true)
+        viewPager.setCurrentItem(0, true)
 
         val imageView1 = ImageView(this)
         imageView1.setImageResource(R.drawable.settings_icon)
