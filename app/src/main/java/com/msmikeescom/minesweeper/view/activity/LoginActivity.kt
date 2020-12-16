@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -13,6 +14,9 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.msmikeescom.minesweeper.R
+import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
+import com.msmikeescom.minesweeper.viewmodel.LoginViewModel
+import com.msmikeescom.minesweeper.viewmodel.TabbedViewModel
 
 
 class LoginActivity : AppCompatActivity() {
@@ -21,13 +25,16 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var mGoogleSignInClient : GoogleSignInClient
     private lateinit var mSignInButton : SignInButton
     private lateinit var mSignInInstruction : TextView
+    private lateinit var viewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+
         mSignInButton = findViewById(R.id.sign_in_button)
-        mSignInButton.setSize(SignInButton.SIZE_STANDARD);
+        mSignInButton.setSize(SignInButton.SIZE_WIDE);
         mSignInButton.setOnClickListener {
             when (it.id) {
                 R.id.sign_in_button -> signIn()
@@ -53,6 +60,11 @@ class LoginActivity : AppCompatActivity() {
             mSignInInstruction.visibility = View.VISIBLE
             mSignInButton.visibility = View.VISIBLE
         } else {
+            SharePreferencesHelper.getInstance().putCurrentUserId(googleSignInAccount.id)
+            viewModel.saveUserData(googleSignInAccount.displayName
+                    , googleSignInAccount.email
+                    , googleSignInAccount.photoUrl.toString()
+                    , googleSignInAccount.id)
             val intent = Intent(this, TabbedActivity::class.java)
             startActivity(intent)
         }

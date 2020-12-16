@@ -1,7 +1,6 @@
 package com.msmikeescom.minesweeper.view.fragment
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.DisplayMetrics
@@ -30,14 +29,11 @@ import com.msmikeescom.minesweeper.utilities.Constants.FOUR
 import com.msmikeescom.minesweeper.utilities.Constants.HARD_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.MEDIUM_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.MINE
-import com.msmikeescom.minesweeper.utilities.Constants.MINESWEEPER_PREFERENCES
 import com.msmikeescom.minesweeper.utilities.Constants.ONE
 import com.msmikeescom.minesweeper.utilities.Constants.SEVEN
 import com.msmikeescom.minesweeper.utilities.Constants.SIX
-import com.msmikeescom.minesweeper.utilities.Constants.SP_DIFFICULTY
 import com.msmikeescom.minesweeper.utilities.Constants.THREE
 import com.msmikeescom.minesweeper.utilities.Constants.TWO
-import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
 import com.msmikeescom.minesweeper.view.activity.LoginActivity
 import java.time.LocalTime
 import java.util.*
@@ -64,23 +60,11 @@ class MineFieldFragment : Fragment() {
     private var verticalSize = 0
     private var mFieldObjects = Array(horizontalSize) { arrayOfNulls<FieldObject>(verticalSize) }
 
-    private var difficulty: Int
-    get() = SharePreferencesHelper.getInstance().difficulty
-    private set(difficulty) {
-        SharePreferencesHelper.getInstance().putDifficulty(difficulty)
-    }
+    private var difficulty = 10
 
-    private var mineFieldSizeW: Int
-        get() = SharePreferencesHelper.getInstance().mineFieldSizeW
-        private set(mineFieldSizeW) {
-            SharePreferencesHelper.getInstance().putMineFieldSizeW(mineFieldSizeW)
-        }
+    private var mineFieldSizeW = 10
 
-    private var mineFieldSizeH: Int
-        get() = SharePreferencesHelper.getInstance().mineFieldSizeH
-        private set(mineFieldSizeH) {
-            SharePreferencesHelper.getInstance().putMineFieldSizeH(mineFieldSizeH)
-        }
+    private var mineFieldSizeH = 10
 
     companion object {
         private const val TAG = "MineFieldFragment"

@@ -2,9 +2,7 @@ package com.msmikeescom.minesweeper.utilities
 
 object Constants {
 
-    const val SP_DIFFICULTY = "SP_DIFFICULTY"
-    const val SP_MINE_SIZE_W = "SP_MINE_SIZE_W"
-    const val SP_MINE_SIZE_H = "SP_MINE_SIZE_H"
+    const val SP_USER_ID = "SP_USER_ID"
 
     const val MINE_FILED_DEFAULT_SIZE_W = 10
     const val MINE_FILED_DEFAULT_SIZE_H = 12
@@ -24,6 +22,5 @@ object Constants {
     const val SEVEN = 7
     const val EIGHT = 8
 
-    const val INTENT_SIZE_OF_FIELD = "INTENT_SIZE_OF_FIELD"
     const val MINESWEEPER_PREFERENCES = "MINESWEEPER_PREFERENCES"
 }

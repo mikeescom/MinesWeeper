@@ -1,19 +1,13 @@
 package com.msmikeescom.minesweeper.utilities;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.msmikeescom.minesweeper.GlobalApplication;
 
-import static com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES;
 import static com.msmikeescom.minesweeper.utilities.Constants.MINESWEEPER_PREFERENCES;
-import static com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_H;
-import static com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_W;
-import static com.msmikeescom.minesweeper.utilities.Constants.SP_DIFFICULTY;
-import static com.msmikeescom.minesweeper.utilities.Constants.SP_MINE_SIZE_H;
-import static com.msmikeescom.minesweeper.utilities.Constants.SP_MINE_SIZE_W;
+import static com.msmikeescom.minesweeper.utilities.Constants.SP_USER_ID;
 
 public class SharePreferencesHelper {
 
@@ -26,32 +20,16 @@ public class SharePreferencesHelper {
 
     public static synchronized SharePreferencesHelper getInstance() {
         if (INSTANCE == null) {
-            return new SharePreferencesHelper();
+            INSTANCE = new SharePreferencesHelper();
         }
         return INSTANCE;
     }
 
-    public void putMineFieldSizeW(int mineSizeW) {
-        sharedPreferences.edit().putInt(SP_MINE_SIZE_W, mineSizeW).apply();
+    public void putCurrentUserId(String id) {
+        sharedPreferences.edit().putString(SP_USER_ID, id).apply();
     }
 
-    public int getMineFieldSizeW() {
-        return sharedPreferences.getInt(SP_MINE_SIZE_W, MINE_FILED_DEFAULT_SIZE_W);
-    }
-
-    public void putMineFieldSizeH(int mineSizeW) {
-        sharedPreferences.edit().putInt(SP_MINE_SIZE_H, mineSizeW).apply();
-    }
-
-    public int getMineFieldSizeH() {
-        return sharedPreferences.getInt(SP_MINE_SIZE_H, MINE_FILED_DEFAULT_SIZE_H);
-    }
-
-    public void putDifficulty(int difficulty) {
-        sharedPreferences.edit().putInt(SP_DIFFICULTY, difficulty).apply();
-    }
-
-    public int getDifficulty() {
-        return sharedPreferences.getInt(SP_DIFFICULTY, EASY_LEVEL_NUMBER_MINES);
+    public String getCurrentUserId() {
+        return sharedPreferences.getString(SP_USER_ID, "");
     }
 }

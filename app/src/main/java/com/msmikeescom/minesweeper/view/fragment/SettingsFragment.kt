@@ -1,6 +1,5 @@
 package com.msmikeescom.minesweeper.view.fragment
 
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,7 +18,7 @@ import com.msmikeescom.minesweeper.utilities.Constants.MEDIUM_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_H
 import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_W
 import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
-import com.msmikeescom.minesweeper.viewmodel.MainViewModel
+import com.msmikeescom.minesweeper.viewmodel.TabbedViewModel
 
 
 class SettingsFragment : Fragment() {
@@ -27,7 +26,7 @@ class SettingsFragment : Fragment() {
     private lateinit var fieldSizeRadioGroup : RadioGroup
     private lateinit var difficultyLevelRadioGroup : RadioGroup
 
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: TabbedViewModel
     
     private lateinit var applyButton : Button
 
@@ -43,7 +42,7 @@ class SettingsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(TabbedViewModel::class.java)
 
         viewModel.getSettingsDataObject().observe(viewLifecycleOwner, { settingsDataObjects ->
             updateUI(settingsDataObjects)
@@ -59,6 +58,20 @@ class SettingsFragment : Fragment() {
         setUpApplyButton()
         setUpMineFieldSize(mineFieldSizes)
         setUpDifficultyLevel(difficultyLevels)
+
+        viewModel.getSettingsSavedSettingsFromUser().observe(viewLifecycleOwner, { savedSettingFromUser ->
+            setUpSavedSettingsFromUser(savedSettingFromUser)
+        })
+    }
+
+    private fun setUpSavedSettingsFromUser(savedSettingsFromUser : Map<String, Int>) {
+        savedSettingsFromUser.forEach {
+            if (it.key == "mineFiledSize") {
+                fieldSizeRadioGroup.check(it.value)
+            } else if (it.key == "difficultyLevel") {
+                difficultyLevelRadioGroup.check(it.value)
+            }
+        }
     }
 
     private fun setUpApplyButton () {
@@ -79,10 +92,6 @@ class SettingsFragment : Fragment() {
             radioButton.id = it.id.toInt()
             fieldSizeRadioGroup.addView(radioButton)
         }
-
-        fieldSizeRadioGroup.setOnCheckedChangeListener { _, id ->
-
-        }
     }
 
     private fun setUpDifficultyLevel (difficultyLevels: List<DifficultyLevelObject>) {
@@ -94,34 +103,9 @@ class SettingsFragment : Fragment() {
             radioButton.id = it.id.toInt()
             difficultyLevelRadioGroup.addView(radioButton)
         }
-
-        difficultyLevelRadioGroup.setOnCheckedChangeListener { _, id ->
-
-        }
     }
 
     private fun saveSettings() {
-        SharePreferencesHelper.getInstance().putDifficulty(getDifficulty())
-        val mineSize = getFieldSize()
-        SharePreferencesHelper.getInstance().putMineFieldSizeW(mineSize[0])
-        SharePreferencesHelper.getInstance().putMineFieldSizeH(mineSize[1])
+        viewModel.saveSettingsFromUser(fieldSizeRadioGroup.checkedRadioButtonId, difficultyLevelRadioGroup.checkedRadioButtonId)
     }
-
-    private fun getDifficulty() : Int {
-        val radioButton = view?.findViewById<RadioButton>(difficultyLevelRadioGroup.checkedRadioButtonId)
-        when (radioButton?.text) {
-            "Easy" -> return EASY_LEVEL_NUMBER_MINES
-            "Medium" -> return MEDIUM_LEVEL_NUMBER_MINES
-            "Hard" -> return HARD_LEVEL_NUMBER_MINES
-        }
-        return EASY_LEVEL_NUMBER_MINES
-    }
-
-    private fun getFieldSize() : Array<Int> {
-        var w : Int = MINE_FILED_DEFAULT_SIZE_W
-        var h : Int = MINE_FILED_DEFAULT_SIZE_H
-        val radioButton = view?.findViewById<RadioButton>(fieldSizeRadioGroup.checkedRadioButtonId)
-        return arrayOf(w, h)
-    }
-
 }
