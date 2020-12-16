@@ -3,8 +3,6 @@ package com.msmikeescom.minesweeper.view.activity
 import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.marginBottom
-import androidx.core.view.setPadding
 import com.google.android.material.tabs.TabLayout
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.view.custom.NonSwipeableViewPager
@@ -20,7 +18,7 @@ class TabbedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tabbed)
 
-        sectionsPagerAdapter = SectionsPagerAdapter(this, supportFragmentManager)
+        sectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
         viewPager = findViewById(R.id.view_pager)
         viewPager.adapter = sectionsPagerAdapter
         tabs = findViewById(R.id.tabs)

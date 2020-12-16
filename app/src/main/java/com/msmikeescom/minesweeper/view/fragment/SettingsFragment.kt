@@ -1,34 +1,33 @@
 package com.msmikeescom.minesweeper.view.fragment
 
-import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.msmikeescom.minesweeper.R
+import com.msmikeescom.minesweeper.model.DifficultyLevelObject
+import com.msmikeescom.minesweeper.model.MineFieldSizeObject
+import com.msmikeescom.minesweeper.model.SettingsObject
 import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.HARD_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.MEDIUM_LEVEL_NUMBER_MINES
 import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_H
 import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_W
 import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
-import com.msmikeescom.minesweeper.utilities.Utilities
+import com.msmikeescom.minesweeper.viewmodel.MainViewModel
+
 
 class SettingsFragment : Fragment() {
 
     private lateinit var fieldSizeRadioGroup : RadioGroup
-    private lateinit var radioButtonCustom : RadioButton
-    private lateinit var customSizeLayout : View
-    private lateinit var widthSpinner : Spinner
-    private lateinit var heightSpinner : Spinner
-
     private lateinit var difficultyLevelRadioGroup : RadioGroup
-    private lateinit var radioButtonCustomDif : RadioButton
-    private lateinit var customDifficultyLayout : View
-    private lateinit var numberOfMinesSpinner : Spinner
+
+    private lateinit var viewModel: MainViewModel
     
     private lateinit var applyButton : Button
 
@@ -44,14 +43,22 @@ class SettingsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
+        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
+        viewModel.getSettingsDataObject().observe(viewLifecycleOwner, { settingsDataObjects ->
+            updateUI(settingsDataObjects)
+        })
+
         return inflater.inflate(R.layout.fragment_settings, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
+    private fun updateUI(settingsDataObjects: SettingsObject) {
+        val mineFieldSizes = settingsDataObjects.mineFieldSizeObjects.sortedBy { it.id }
+        val difficultyLevels = settingsDataObjects.difficultyLevelObjects.sortedBy { it.id }
+
         setUpApplyButton()
-        setUpMineFieldSize()
-        setUpDifficultyLevel()
+        setUpMineFieldSize(mineFieldSizes)
+        setUpDifficultyLevel(difficultyLevels)
     }
 
     private fun setUpApplyButton () {
@@ -60,6 +67,36 @@ class SettingsFragment : Fragment() {
             saveSettings()
             val viewPager = requireActivity().findViewById<ViewPager>(R.id.view_pager)
             viewPager.setCurrentItem(1, true)
+        }
+    }
+
+    private fun setUpMineFieldSize(mineFieldSizes: List<MineFieldSizeObject>) {
+        fieldSizeRadioGroup = view?.findViewById(R.id.field_size_radio_group)!!
+
+        mineFieldSizes.forEach {
+            val radioButton: RadioButton = layoutInflater.inflate(R.layout.settings_radio_button, null) as RadioButton
+            radioButton.text = it.label
+            radioButton.id = it.id.toInt()
+            fieldSizeRadioGroup.addView(radioButton)
+        }
+
+        fieldSizeRadioGroup.setOnCheckedChangeListener { _, id ->
+
+        }
+    }
+
+    private fun setUpDifficultyLevel (difficultyLevels: List<DifficultyLevelObject>) {
+        difficultyLevelRadioGroup = view?.findViewById(R.id.difficulty_level_radio_group)!!
+
+        difficultyLevels.forEach {
+            val radioButton: RadioButton = layoutInflater.inflate(R.layout.settings_radio_button, null) as RadioButton
+            radioButton.text = it.label
+            radioButton.id = it.id.toInt()
+            difficultyLevelRadioGroup.addView(radioButton)
+        }
+
+        difficultyLevelRadioGroup.setOnCheckedChangeListener { _, id ->
+
         }
     }
 
@@ -76,9 +113,6 @@ class SettingsFragment : Fragment() {
             "Easy" -> return EASY_LEVEL_NUMBER_MINES
             "Medium" -> return MEDIUM_LEVEL_NUMBER_MINES
             "Hard" -> return HARD_LEVEL_NUMBER_MINES
-            "Custom difficulty" -> {
-                return (widthSpinner.selectedItem as TextView).text as Int
-            }
         }
         return EASY_LEVEL_NUMBER_MINES
     }
@@ -87,70 +121,7 @@ class SettingsFragment : Fragment() {
         var w : Int = MINE_FILED_DEFAULT_SIZE_W
         var h : Int = MINE_FILED_DEFAULT_SIZE_H
         val radioButton = view?.findViewById<RadioButton>(fieldSizeRadioGroup.checkedRadioButtonId)
-        when (radioButton?.text) {
-            "12 x 15" -> {
-                w = 12
-                h = 15
-            }
-            "15 x 18" -> {
-                w = 15
-                h = 18
-            }
-            "Custom size" -> {
-                w = (widthSpinner.selectedItem as TextView).text as Int
-                h = (heightSpinner.selectedItem as TextView).text as Int
-            }
-            "Fit screen size" -> {
-                w = 0
-                h = 0
-            }
-        }
-        return arrayOf(w,h)
-    }
-
-    private fun setUpMineFieldSize () {
-        val widths = resources.getStringArray(R.array.Widths)
-        val heights = resources.getStringArray(R.array.Heights)
-
-        widthSpinner = view?.findViewById(R.id.width_spinner)!!
-        val adapterWidths = ArrayAdapter(requireContext(), R.layout.spinner_item, widths)
-        widthSpinner.adapter = adapterWidths
-
-        heightSpinner = view?.findViewById(R.id.height_spinner)!!
-        val adapterHeights = ArrayAdapter(requireContext(), R.layout.spinner_item, heights)
-        heightSpinner.adapter = adapterHeights
-
-        customSizeLayout = view?.findViewById(R.id.custom_size_layout)!!
-        fieldSizeRadioGroup = view?.findViewById(R.id.field_size_radio_group)!!
-        fieldSizeRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.radio_button_fixed_1 -> Utilities.collapse(customSizeLayout)
-                R.id.radio_button_fixed_2 -> Utilities.collapse(customSizeLayout)
-                R.id.radio_button_custom -> Utilities.expand(customSizeLayout)
-                R.id.radio_button_fit -> Utilities.collapse(customSizeLayout)
-            }
-        }
-        radioButtonCustom = view?.findViewById(R.id.radio_button_custom)!!
-    }
-
-    private fun setUpDifficultyLevel () {
-        val numberOfMines = resources.getStringArray(R.array.Mines)
-
-        numberOfMinesSpinner = view?.findViewById(R.id.number_of_mines_spinner)!!
-        val adapterWidths = ArrayAdapter(requireContext(), R.layout.spinner_item, numberOfMines)
-        numberOfMinesSpinner.adapter = adapterWidths
-
-        customDifficultyLayout = view?.findViewById(R.id.custom_difficulty_layout)!!
-        difficultyLevelRadioGroup = view?.findViewById(R.id.difficulty_level_radio_group)!!
-        difficultyLevelRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.radio_button_easy -> Utilities.collapse(customDifficultyLayout)
-                R.id.radio_button_medium -> Utilities.collapse(customDifficultyLayout)
-                R.id.radio_button_hard -> Utilities.collapse(customDifficultyLayout)
-                R.id.radio_button_custom_dif -> Utilities.expand(customDifficultyLayout)
-            }
-        }
-        radioButtonCustomDif = view?.findViewById(R.id.radio_button_custom_dif)!!
+        return arrayOf(w, h)
     }
 
 }
