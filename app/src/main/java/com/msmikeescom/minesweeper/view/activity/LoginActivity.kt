@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -14,14 +15,14 @@ import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.msmikeescom.minesweeper.R
+import com.msmikeescom.minesweeper.utilities.Constants.RC_SIGN_IN
+import com.msmikeescom.minesweeper.utilities.Constants.RC_SIGN_OUT
 import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
 import com.msmikeescom.minesweeper.viewmodel.LoginViewModel
-import com.msmikeescom.minesweeper.viewmodel.TabbedViewModel
 
 
 class LoginActivity : AppCompatActivity() {
 
-    private val RC_SIGN_IN: Int = 1001
     private lateinit var mGoogleSignInClient : GoogleSignInClient
     private lateinit var mSignInButton : SignInButton
     private lateinit var mSignInInstruction : TextView
@@ -61,12 +62,9 @@ class LoginActivity : AppCompatActivity() {
             mSignInButton.visibility = View.VISIBLE
         } else {
             SharePreferencesHelper.getInstance().putCurrentUserId(googleSignInAccount.id)
-            viewModel.saveUserData(googleSignInAccount.displayName
-                    , googleSignInAccount.email
-                    , googleSignInAccount.photoUrl.toString()
-                    , googleSignInAccount.id)
+            viewModel.saveUserData(googleSignInAccount.displayName, googleSignInAccount.email, googleSignInAccount.photoUrl.toString(), googleSignInAccount.id)
             val intent = Intent(this, TabbedActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, RC_SIGN_OUT)
         }
     }
 
@@ -75,11 +73,18 @@ class LoginActivity : AppCompatActivity() {
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
+    private fun signOut() {
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this) {
+                    Toast.makeText(this, "Successfully log out!", Toast.LENGTH_LONG).show()
+                }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode === RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
+        when (requestCode) {
+            RC_SIGN_IN -> { handleSignInResult(GoogleSignIn.getSignedInAccountFromIntent(data)) }
+            RC_SIGN_OUT -> signOut()
         }
     }
 

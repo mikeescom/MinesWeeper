@@ -2,6 +2,9 @@ package com.msmikeescom.minesweeper.utilities
 
 object Constants {
 
+    const val RC_SIGN_IN: Int = 1001
+    const val RC_SIGN_OUT: Int = 1002
+
     const val SP_USER_ID = "SP_USER_ID"
 
     const val MINE_FILED_DEFAULT_SIZE_W = 10

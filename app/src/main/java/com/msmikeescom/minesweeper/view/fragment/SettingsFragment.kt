@@ -1,5 +1,7 @@
 package com.msmikeescom.minesweeper.view.fragment
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,12 +14,7 @@ import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.model.DifficultyLevelObject
 import com.msmikeescom.minesweeper.model.MineFieldSizeObject
 import com.msmikeescom.minesweeper.model.SettingsObject
-import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
-import com.msmikeescom.minesweeper.utilities.Constants.HARD_LEVEL_NUMBER_MINES
-import com.msmikeescom.minesweeper.utilities.Constants.MEDIUM_LEVEL_NUMBER_MINES
-import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_H
-import com.msmikeescom.minesweeper.utilities.Constants.MINE_FILED_DEFAULT_SIZE_W
-import com.msmikeescom.minesweeper.utilities.SharePreferencesHelper
+import com.msmikeescom.minesweeper.utilities.Constants.RC_SIGN_OUT
 import com.msmikeescom.minesweeper.viewmodel.TabbedViewModel
 
 
@@ -28,7 +25,8 @@ class SettingsFragment : Fragment() {
 
     private lateinit var viewModel: TabbedViewModel
     
-    private lateinit var applyButton : Button
+    private lateinit var applyButton : ImageView
+    private lateinit var exitButton : ImageView
 
     companion object {
         fun getInstance(position: Int): Fragment {
@@ -64,7 +62,7 @@ class SettingsFragment : Fragment() {
         })
     }
 
-    private fun setUpSavedSettingsFromUser(savedSettingsFromUser : Map<String, Long>) {
+    private fun setUpSavedSettingsFromUser(savedSettingsFromUser: Map<String, Long>) {
         savedSettingsFromUser.forEach {
             if (it.key == "mineFiledSize") {
                 fieldSizeRadioGroup.check(it.value.toInt())
@@ -81,6 +79,12 @@ class SettingsFragment : Fragment() {
             val viewPager = requireActivity().findViewById<ViewPager>(R.id.view_pager)
             viewPager.setCurrentItem(1, true)
         }
+
+        exitButton = view?.findViewById(R.id.exit_button)!!
+        exitButton.setOnClickListener {
+            requireActivity().setResult(RC_SIGN_OUT)
+            requireActivity().finish()
+        }
     }
 
     private fun setUpMineFieldSize(mineFieldSizes: List<MineFieldSizeObject>) {
@@ -94,7 +98,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun setUpDifficultyLevel (difficultyLevels: List<DifficultyLevelObject>) {
+    private fun setUpDifficultyLevel(difficultyLevels: List<DifficultyLevelObject>) {
         difficultyLevelRadioGroup = view?.findViewById(R.id.difficulty_level_radio_group)!!
 
         difficultyLevels.forEach {

@@ -83,15 +83,29 @@
                             android:layout_height="wrap_content"/>
                     </androidx.cardview.widget.CardView>
 
-                    <Button
-                        android:id="@+id/apply_button"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="30dp"
-                        android:layout_gravity="center"
-                        android:fontFamily="@font/game_played"
-                        android:text="Apply"/>
-
+                        android:orientation="horizontal">
+                        <ImageView
+                            android:id="@+id/apply_button"
+                            android:contentDescription="Submit"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/game_played"
+                            android:src="@drawable/ic_apply"/>
+                        <ImageView
+                            android:id="@+id/exit_button"
+                            android:contentDescription="Exit"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_alignParentEnd="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:src="@drawable/ic_exit"/>
+                    </RelativeLayout>
                 </LinearLayout>
             </ScrollView>
         </androidx.cardview.widget.CardView>

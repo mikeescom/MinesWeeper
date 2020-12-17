@@ -37,7 +37,6 @@ import java.util.*
 class MineFieldFragment : Fragment() {
 
     private var mMineFiled: GridLayout? = null
-    private var mExit: ImageView? = null
     private var mNew: ImageView? = null
     private var mProfileImage: ImageView? = null
     private var mProfileName: TextView? = null
@@ -139,11 +138,7 @@ class MineFieldFragment : Fragment() {
         mProfileName = view?.findViewById(R.id.profile_name)
         mMineFiled = view?.findViewById(R.id.mine_field)
         mNew = view?.findViewById(R.id.new_icon)
-        mExit = view?.findViewById(R.id.exit_icon)
         mNew?.setOnClickListener { requireActivity().recreate() }
-        mExit?.setOnClickListener {
-
-        }
         updateCounter(mNumberOfMines)
     }
 
