@@ -71,6 +71,11 @@ class MineFieldFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         viewModel = ViewModelProvider(this).get(TabbedViewModel::class.java)
+        getFirebaseData()
+        return inflater.inflate(R.layout.fragment_mine_field, container, false)
+    }
+
+    private fun getFirebaseData() {
         viewModel.getSavedMineFiledSizes().observe(viewLifecycleOwner, { savedMineFiledSizes ->
             if (false) { // TODO: Handle to fit screen
                 val displayMetrics: DisplayMetrics = resources.displayMetrics
@@ -90,8 +95,6 @@ class MineFieldFragment : Fragment() {
                 handleSignInResult()
             })
         })
-
-        return inflater.inflate(R.layout.fragment_mine_field, container, false)
     }
 
     private fun handleSignInResult() {

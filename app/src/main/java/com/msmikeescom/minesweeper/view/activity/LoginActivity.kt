@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
         } else {
             SharePreferencesHelper.getInstance().putCurrentUserId(googleSignInAccount.id)
             viewModel.saveUserData(googleSignInAccount.displayName, googleSignInAccount.email, googleSignInAccount.photoUrl.toString(), googleSignInAccount.id)
-            val intent = Intent(this, TabbedActivity::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivityForResult(intent, RC_SIGN_OUT)
         }
     }

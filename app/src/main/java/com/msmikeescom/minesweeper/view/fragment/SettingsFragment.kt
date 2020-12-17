@@ -76,8 +76,7 @@ class SettingsFragment : Fragment() {
         applyButton = view?.findViewById(R.id.apply_button)!!
         applyButton.setOnClickListener {
             saveSettings()
-            val viewPager = requireActivity().findViewById<ViewPager>(R.id.view_pager)
-            viewPager.setCurrentItem(1, true)
+            // TODO
         }
 
         exitButton = view?.findViewById(R.id.exit_button)!!
