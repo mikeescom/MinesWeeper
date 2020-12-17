@@ -1,6 +1,5 @@
 package com.msmikeescom.minesweeper.view.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.DisplayMetrics
@@ -13,12 +12,8 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.google.android.gms.auth.api.Auth
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.GoogleApiClient
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.model.FieldObject
 import com.msmikeescom.minesweeper.utilities.Constants.EASY_LEVEL_NUMBER_MINES
@@ -34,7 +29,7 @@ import com.msmikeescom.minesweeper.utilities.Constants.SEVEN
 import com.msmikeescom.minesweeper.utilities.Constants.SIX
 import com.msmikeescom.minesweeper.utilities.Constants.THREE
 import com.msmikeescom.minesweeper.utilities.Constants.TWO
-import com.msmikeescom.minesweeper.view.activity.LoginActivity
+import com.msmikeescom.minesweeper.viewmodel.TabbedViewModel
 import java.time.LocalTime
 import java.util.*
 
@@ -52,19 +47,15 @@ class MineFieldFragment : Fragment() {
     private var mNumberOfMines = 0
     private var mMinesFound = 0
     private var mChronometerTime = 0
-    private var googleApiClient: GoogleApiClient? = null
-    private var gso: GoogleSignInOptions? = null
     private var dpHeight = 0
     private var dpWidth = 0
     private var horizontalSize = 0
     private var verticalSize = 0
     private var mFieldObjects = Array(horizontalSize) { arrayOfNulls<FieldObject>(verticalSize) }
 
+    private lateinit var viewModel: TabbedViewModel
+
     private var difficulty = 10
-
-    private var mineFieldSizeW = 10
-
-    private var mineFieldSizeH = 10
 
     companion object {
         private const val TAG = "MineFieldFragment"
@@ -80,49 +71,36 @@ class MineFieldFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val displayMetrics: DisplayMetrics = resources.displayMetrics
-        dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 220
-        dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt() - 10
+        viewModel = ViewModelProvider(this).get(TabbedViewModel::class.java)
+        viewModel.getSavedMineFiledSizes().observe(viewLifecycleOwner, { savedMineFiledSizes ->
+            if (false) { // TODO: Handle to fit screen
+                val displayMetrics: DisplayMetrics = resources.displayMetrics
+                dpHeight = (displayMetrics.heightPixels / displayMetrics.density).toInt() - 220
+                dpWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt() - 10
+                verticalSize = (dpHeight / 30)
+                horizontalSize = (dpWidth / 30)
+            } else {
+                verticalSize = savedMineFiledSizes.first.toInt()
+                horizontalSize = savedMineFiledSizes.second.toInt()
+            }
 
-        if (mineFieldSizeW == 0 && mineFieldSizeH == 0) {
-            verticalSize = (dpHeight / 30)
-            horizontalSize = (dpWidth / 30)
-        } else {
-            verticalSize = mineFieldSizeW
-            horizontalSize = mineFieldSizeH
-        }
+            mFieldObjects = Array(horizontalSize) { arrayOfNulls(verticalSize) }
 
-        mFieldObjects = Array(horizontalSize) { arrayOfNulls(verticalSize) }
+            viewModel.getSavedDifficultyLevel().observe(viewLifecycleOwner, { difficultyLevel ->
+                difficulty = difficultyLevel.toInt()
+                handleSignInResult()
+            })
+        })
 
-        getGoogleAccountResult()
         return inflater.inflate(R.layout.fragment_mine_field, container, false)
     }
 
-    override fun onStart() {
-        super.onStart()
-        googleApiClient?.connect()
-        val account = GoogleSignIn.getLastSignedInAccount(requireContext())
-        if (account != null) {
-            handleSignInResult(account)
-        }
-    }
-
-    private fun getGoogleAccountResult () {
-        gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                .requestEmail()
-                .build()
-
-        googleApiClient = GoogleApiClient.Builder(requireContext())
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso!!)
-                .build()
-    }
-
-    private fun handleSignInResult(account: GoogleSignInAccount) {
+    private fun handleSignInResult() {
         initData()
         initFieldObjectsArray()
         buildMineFiled()
         initView()
-        initProfile(account)
+        initProfile()
         initMineField()
     }
 
@@ -164,18 +142,16 @@ class MineFieldFragment : Fragment() {
         mExit = view?.findViewById(R.id.exit_icon)
         mNew?.setOnClickListener { requireActivity().recreate() }
         mExit?.setOnClickListener {
-            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback {
-                val status = it;
-                val intent = Intent(requireActivity(), LoginActivity::class.java)
-                startActivity(intent)
-            }
+
         }
         updateCounter(mNumberOfMines)
     }
 
-    private fun initProfile(account: GoogleSignInAccount) {
-        mProfileName?.text = account.displayName
-        Glide.with(this).load(account.photoUrl).into(mProfileImage!!);
+    private fun initProfile() {
+        viewModel.getProfile().observe(viewLifecycleOwner, {
+            mProfileName?.text = it.profileName
+            Glide.with(this).load(it.photoUrl).into(mProfileImage!!);
+        })
     }
 
     private fun initMineField() {

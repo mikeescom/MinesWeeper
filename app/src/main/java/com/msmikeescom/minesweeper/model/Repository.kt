@@ -10,16 +10,36 @@ class Repository {
     private val db = Firebase.firestore
     private val mineFieldList : ArrayList<MineFieldSizeObject> = ArrayList()
     private val difficultyLevelList : ArrayList<DifficultyLevelObject> = ArrayList()
+
+    private val profileLiveData : MutableLiveData<ProfileObject> = MutableLiveData()
     private val settingsLiveDataObject : MutableLiveData<SettingsObject> = MutableLiveData()
-    private val savedSettingsFromUserLiveDataObject : MutableLiveData<Map<String, Int>> = MutableLiveData()
+    private val savedSettingsFromUserLiveDataObject : MutableLiveData<Map<String, Long>> = MutableLiveData()
+    private val mineFieldSizeLiveData : MutableLiveData<Pair<Long, Long>> = MutableLiveData()
+    private val difficultyLevelLiveData : MutableLiveData<Long> = MutableLiveData()
 
     companion object {
         val TAG : String = Repository::class.java.simpleName
     }
 
+    fun callProfile(id: String?) {
+        db.collection("users").document(id!!).get()
+                .addOnSuccessListener { document ->
+                    if (!document.data.isNullOrEmpty()) {
+                        profileLiveData.postValue(ProfileObject(document.data!!["displayName"] as String
+                                , document.data!!["photoUrl"] as String))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+    }
+
+    fun getProfile() : MutableLiveData<ProfileObject> {
+        return profileLiveData
+    }
+
     fun callSettingsDataObjects() {
-        val mineFieldSizes = db.collection("mineFieldSizes")
-        mineFieldSizes.get()
+        db.collection("mineFieldSizes").get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
                         Log.d(TAG, "${document.id} => ${document.data}")
@@ -90,19 +110,22 @@ class Repository {
 
     fun callSavedSettingsFromUser (id: String?) {
         var lastSavedSettings = mapOf(
-                "mineFiledSize" to 0,
-                "difficultyLevel" to 0
+                "mineFiledSize" to 0L,
+                "difficultyLevel" to 0L
         )
 
         db.collection("users").document(id!!).get()
                 .addOnSuccessListener { document ->
-                    if (document.data!!["lastSavedSettings"]?.toString().isNullOrEmpty()) {
+                    if (document.data!!["mineFiledSize"]?.toString().isNullOrEmpty()) {
                         db.collection("users").document(id)
                                 .update(lastSavedSettings)
                                 .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully written!") }
                                 .addOnFailureListener { e -> Log.w(TAG, "Error writing document", e) }
                     } else {
-                        lastSavedSettings = document.data?.get("lastSavedSettings") as HashMap<String, Int>
+                        lastSavedSettings = mapOf(
+                                "mineFiledSize" to document.data!!["mineFiledSize"] as Long,
+                                "difficultyLevel" to document.data!!["difficultyLevel"] as Long
+                        )
                     }
 
                     savedSettingsFromUserLiveDataObject.postValue(lastSavedSettings)
@@ -112,7 +135,67 @@ class Repository {
                 }
     }
 
-    fun getSavedSettingsFromUser () : MutableLiveData<Map<String, Int>> {
+    fun getSavedSettingsFromUser () : MutableLiveData<Map<String, Long>> {
         return savedSettingsFromUserLiveDataObject
+    }
+
+    fun callSavedMineFiledSizes (id: String?) {
+        db.collection("users").document(id!!).get()
+                .addOnSuccessListener { document ->
+                    val mineFiledSize = document.data!!["mineFiledSize"]
+                    if (mineFiledSize?.toString().isNullOrEmpty()) {
+
+                    } else {
+                        db.collection("mineFieldSizes").get()
+                                .addOnSuccessListener { result ->
+                                    for (doc in result) {
+                                        if (mineFiledSize == doc.data["id"]) {
+                                            mineFieldSizeLiveData.postValue(Pair(doc.data["width"] as Long, doc.data["height"] as Long))
+                                            break
+                                        }
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    Log.d(TAG, "get failed with ", exception)
+                                }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+    }
+
+    fun getSavedMineFiledSizes () : MutableLiveData<Pair<Long, Long>> {
+        return mineFieldSizeLiveData
+    }
+
+    fun callSavedDifficultyLevel (id: String?) {
+        db.collection("users").document(id!!).get()
+                .addOnSuccessListener { document ->
+                    val difficultyLevel = document.data!!["difficultyLevel"]
+                    if (difficultyLevel?.toString().isNullOrEmpty()) {
+
+                    } else {
+                        db.collection("difficultyLevels").get()
+                                .addOnSuccessListener { result ->
+                                    for (doc in result) {
+                                        if (difficultyLevel == doc.data["id"]) {
+                                            difficultyLevelLiveData.postValue(doc.data["value"] as Long)
+                                            break
+                                        }
+                                    }
+                                }
+                                .addOnFailureListener { exception ->
+                                    Log.d(TAG, "get failed with ", exception)
+                                }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.d(TAG, "get failed with ", exception)
+                }
+    }
+
+    fun getSavedDifficultyLevel () : MutableLiveData<Long> {
+        return difficultyLevelLiveData
     }
 }

@@ -64,12 +64,12 @@ class SettingsFragment : Fragment() {
         })
     }
 
-    private fun setUpSavedSettingsFromUser(savedSettingsFromUser : Map<String, Int>) {
+    private fun setUpSavedSettingsFromUser(savedSettingsFromUser : Map<String, Long>) {
         savedSettingsFromUser.forEach {
             if (it.key == "mineFiledSize") {
-                fieldSizeRadioGroup.check(it.value)
+                fieldSizeRadioGroup.check(it.value.toInt())
             } else if (it.key == "difficultyLevel") {
-                difficultyLevelRadioGroup.check(it.value)
+                difficultyLevelRadioGroup.check(it.value.toInt())
             }
         }
     }
