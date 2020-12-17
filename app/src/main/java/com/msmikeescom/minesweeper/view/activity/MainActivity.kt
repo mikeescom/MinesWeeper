@@ -11,7 +11,7 @@ import com.msmikeescom.minesweeper.view.fragment.SettingsFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var bottomNavigationView : BottomNavigationView
+    lateinit var bottomNavigationView : BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,18 +26,17 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView = findViewById(R.id.bottom_navigation_view)
         bottomNavigationView.setOnNavigationItemSelectedListener {
             when(it.itemId){
-                R.id.settings -> setCurrentFragment(settingsFragment)
-                R.id.mine_field -> setCurrentFragment(mineFieldFragment)
-                R.id.profile -> setCurrentFragment(profileFragment)
-
+                R.id.settings_menu -> setCurrentFragment(settingsFragment)
+                R.id.mine_field_menu -> setCurrentFragment(mineFieldFragment)
+                R.id.profile_menu -> setCurrentFragment(profileFragment)
             }
             true
         }
     }
 
-    private fun setCurrentFragment(fragment: Fragment)=
+    private fun setCurrentFragment(fragment: Fragment) =
             supportFragmentManager.beginTransaction().apply {
-                replace(R.id.flFragment,fragment)
+                replace(R.id.fl_fragment, fragment)
                 commit()
             }
 }

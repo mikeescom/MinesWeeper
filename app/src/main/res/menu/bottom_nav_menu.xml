@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/settings"
+        android:id="@+id/settings_menu"
         android:title="Settings"
         android:icon="@drawable/settings_icon"/>
     <item
-        android:id="@+id/mine_field"
+        android:id="@+id/mine_field_menu"
         android:title="MineField"
         android:icon="@drawable/game_pad_icon"/>
     <item
-        android:id="@+id/profile"
+        android:id="@+id/profile_menu"
         android:title="Profile"
         android:icon="@drawable/profile_icon"/>
 </menu>

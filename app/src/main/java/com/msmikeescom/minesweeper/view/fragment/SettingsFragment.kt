@@ -10,6 +10,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.msmikeescom.minesweeper.R
 import com.msmikeescom.minesweeper.model.DifficultyLevelObject
 import com.msmikeescom.minesweeper.model.MineFieldSizeObject
@@ -76,7 +77,7 @@ class SettingsFragment : Fragment() {
         applyButton = view?.findViewById(R.id.apply_button)!!
         applyButton.setOnClickListener {
             saveSettings()
-            // TODO
+            requireActivity().findViewById<BottomNavigationView>(R.id.bottom_navigation_view).selectedItemId = R.id.mine_field_menu
         }
 
         exitButton = view?.findViewById(R.id.exit_button)!!

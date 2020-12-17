@@ -428,16 +428,16 @@ class MineFieldFragment : Fragment() {
 
     private fun setImageNumber(imageView: ImageView, digit: Int) {
         when (digit) {
-            0 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_0, null))
-            1 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_1, null))
-            2 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_2, null))
-            3 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_3, null))
-            4 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_4, null))
-            5 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_5, null))
-            6 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_6, null))
-            7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_7, null))
-            8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_8, null))
-            9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.digit_9, null))
+            0 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_0, null))
+            1 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_1, null))
+            2 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_2, null))
+            3 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_3, null))
+            4 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_4, null))
+            5 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_5, null))
+            6 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_6, null))
+            7 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_7, null))
+            8 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_8, null))
+            9 -> imageView.setImageDrawable(ResourcesCompat.getDrawable(requireActivity().resources, R.drawable.digit_9, null))
         }
     }
 
