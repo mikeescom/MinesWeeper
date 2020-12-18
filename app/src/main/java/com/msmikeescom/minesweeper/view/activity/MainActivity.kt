@@ -27,23 +27,54 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigationView = findViewById(R.id.bottom_navigation_view)
         bottomNavigationView.setOnNavigationItemSelectedListener {
-            when(it.itemId){
-                R.id.settings_menu -> setCurrentFragment(settingsFragment)
-                R.id.mine_field_menu -> setCurrentFragment(mineFieldFragment)
-                R.id.profile_menu -> setCurrentFragment(profileFragment)
+            when(it.itemId) {
+                R.id.settings_menu -> {
+                    if (currentFragment is MineFieldFragment) {
+                        showAlertDialog(settingsFragment)
+                        false
+                    } else {
+                        setCurrentFragment(settingsFragment)
+                        true
+                    }
+                }
+                R.id.mine_field_menu -> {
+                    setCurrentFragment(mineFieldFragment)
+                    true
+                }
+                R.id.profile_menu -> {
+                    if (currentFragment is MineFieldFragment) {
+                        showAlertDialog(profileFragment)
+                        false
+                    } else {
+                        setCurrentFragment(profileFragment)
+                        true
+                    }
+                }
+                else -> false
             }
-            true
         }
     }
 
-    private fun setCurrentFragment(fragment: Fragment) {
-        if (fragment !is MineFieldFragment && currentFragment is MineFieldFragment) {
-            CustomDialog().show(supportFragmentManager, "MyCustomFragment")
-        } else {
-            supportFragmentManager.beginTransaction().apply {
-                replace(R.id.fl_fragment, fragment)
-                commit()
+    private fun showAlertDialog(fragment: Fragment) {
+        val customDialog = CustomDialog()
+        customDialog.setOnClickListener(object : CustomDialog.OnClickListener {
+            override fun onOkClick() {
+                setCurrentFragment(fragment)
+                bottomNavigationView.selectedItemId =
+                        if (fragment is SettingsFragment) {
+                            R.id.settings_menu
+                        } else {
+                            R.id.profile_menu
+                        }
             }
+        })
+        customDialog.show(supportFragmentManager, fragment.tag)
+    }
+
+    private fun setCurrentFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.fl_fragment, fragment)
+            commit()
         }
         currentFragment = fragment
     }
