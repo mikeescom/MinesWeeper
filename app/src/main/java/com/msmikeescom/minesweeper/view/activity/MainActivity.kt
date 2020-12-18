@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.msmikeescom.minesweeper.R
+import com.msmikeescom.minesweeper.view.custom.CustomDialog
 import com.msmikeescom.minesweeper.view.fragment.MineFieldFragment
 import com.msmikeescom.minesweeper.view.fragment.ProfileFragment
 import com.msmikeescom.minesweeper.view.fragment.SettingsFragment
@@ -12,6 +13,7 @@ import com.msmikeescom.minesweeper.view.fragment.SettingsFragment
 class MainActivity : AppCompatActivity() {
 
     lateinit var bottomNavigationView : BottomNavigationView
+    private var currentFragment: Fragment = SettingsFragment()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +36,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setCurrentFragment(fragment: Fragment) =
+    private fun setCurrentFragment(fragment: Fragment) {
+        if (fragment !is MineFieldFragment && currentFragment is MineFieldFragment) {
+            CustomDialog().show(supportFragmentManager, "MyCustomFragment")
+        } else {
             supportFragmentManager.beginTransaction().apply {
                 replace(R.id.fl_fragment, fragment)
                 commit()
             }
+        }
+        currentFragment = fragment
+    }
 }
